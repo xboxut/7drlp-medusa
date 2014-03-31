@@ -113,9 +113,9 @@ int creer_salle_cafeteria(carte *crte, int x, int y, int w, int h,int orientatio
 int creer_salle_dortoir(carte *crte, int x, int y, int w, int h,int orientation);
 
 
-/*********************************************************************
-**************************FONCTIONS DIVERSES ****************************
-*********************************************************************/
+/***************************************************************************************************************************************
+**************************FONCTIONS DIVERSES RECHERCHE ET DEPOT d'OBJET DE TILE POUR DEPLACEMENT COMBAT CONSTRUCTION DE CARTE****************************
+****************************************************************************************************************************************/
 
 //int vider_champ_vision_carte(carte *crte);
 //
@@ -144,6 +144,10 @@ int validite_deplacement(carte *crte,int x,int y, int dx,int dy);
 // pnj present en x, y
 acteur* obtenir_ennemi(carte *crte,int x, int y);
 
+// Fonction pour recupererun pointeur sur l eventuel
+// moilier present en x y
+acteur *obtenir_mobilier(carte *crte,int x, int y);
+
 // fonction pour savoir si du mobilier existe en x et y
 bool mobilier_present(carte *crte,int x, int  y);
 
@@ -155,3 +159,72 @@ int ajouter_objet(carte *crte,objet *obj);
 
 
 carte * cree_carte_test();
+
+
+/*****************************************************************************
+*********************** INTERACTION DU MOBILIER AVEC LA CARTE ***************/
+
+//int effectuer_explosion(carte *crte, int x, int y, int rayon, int max_dmg);
+//
+//Fonction pour faire exploser les grenades ou les bouteilles de gaz
+// applique des degats a l'ensemble des acteur autour de l'explosion
+// avec un facteur 1/r^2 pour plus de realisme.
+// Le degat sont ensuite infligés aux tiles comme les portes les vites etc.
+int effectuer_explosion(carte *crte, int x, int y, int rayon, int max_dmg);
+
+//int repandre_acide(carte *crte,int x, int y);
+//
+// Fontion pour remplacer le sol autour de bouteilles d'acide
+// par des flaques de liquide corrosif 1 carreau autour de la position x,y
+int repandre_acide(carte *crte,int x, int y);
+
+
+
+//int detruire_bouteille_gaz(carte *crte,acteur *act);
+//
+//Fonction pour détruire une bouteille de gaz.
+// transforme l'affichage, la caracteristique passable ou non
+// et genere une explosion
+//
+//
+//retourne 0 si ras
+// retoune 1 si l'explosion tue le joueur
+int detruire_bouteille_gaz(carte *crte,acteur *act,joueur *ply1);
+int detruire_bouteille_gaz(carte *crte,int index,joueur *ply1);
+ 
+
+
+// int detruire_conteneur_acide(carte *crte,acteur *act);
+//
+//Fonction pour détruire un conteneur d'acide.
+// transforme l'affichage, la caracteristique passable ou non
+// et repand l'acide surle sol
+//
+int detruire_conteneur_acide(carte *crte,acteur *act);
+int detruire_conteneur_acide(carte *crte,int index);
+
+ 
+ /****************************************************************
+ *****************INTERACTION DES ACTEURS AVEC LA CARTE *********/
+ 
+ //int maj_degat_acide(joueur *jr);
+//
+//Fonction pour ajouter d'eventuels degat du
+// a l'acide.
+// retourne 0 si la santé atteint 0
+// retourne 1 si il y a dégat du a l acide
+// retourne 2 si il n y a pas de dégat du a l acide
+// LES CHAUSSURES PROTEGENT DE L ACIDE MAIS SE DEGRADENT VITE.
+int maj_degat_acide(joueur *jr,carte *crte);
+int maj_degat_acide(acteur *act,carte *crte);
+
+//int ajout_degat_verre(joueur *jr);
+//
+//Fonction pour ajouter d'eventuels degat du
+// aux morceaux de verrespar terre si l'acteur ou le joueur
+// ne possède pas de chaussure
+// retourne 0 si la santé atteint 0
+// retourne 1 si il y a dégat du a verre
+// retourne 2 si il le joueur ne prend pas de dégat 
+int ajout_degat_verre(joueur *jr,carte *crte);
+int ajout_degat_verre(acteur *act,carte *crte);

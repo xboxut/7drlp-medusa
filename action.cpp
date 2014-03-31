@@ -71,7 +71,7 @@ action::~action()
 						//attente   marche   prise_obj cmbt_cac cmbt_lanc cmbtlent 
  int action_d[MAX_ACTION]={400,	    400,	 800,		500	,	 800,	   800,		
                         /*cmbtrapid rechar p_medic  habillmnt equmain  mdifcorpo 	lache_obj,	fermer_porte*/
- 							500,	700,	40000,	   8000	,	800,		50000,		600		,	700		};
+ 							500,	700,	5000,	   8000	,	800,		10000,		600		,	400		};
  
 
 
@@ -1039,6 +1039,8 @@ ac[nouv].action_type=ACTION_OUVRIR_FERMER_PORTE;
 
 	// Initiateur de l'action	
 	ac[nouv].initj=jr;
+	ac[nouv].x=x;
+	ac[nouv].y=y;
 	ac[nouv].initc=act;
 	/////////////////////////
 	

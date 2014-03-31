@@ -2,6 +2,16 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include <allegro5/allegro.h>
+#include <allegro5/allegro_audio.h>
+#include <allegro5/allegro_acodec.h>
+#include <allegro5/allegro_image.h>
+#include <allegro5/allegro_primitives.h>
+#include <allegro5/allegro_font.h>
+
+
+#include "gestion_message.h"
+
 #include "mt19937ar.h"
 #include "rgauss.h" 
 #include "const_bmp_index.h"
@@ -15,6 +25,8 @@
 #include "action.h"
 
 #include "carte.h"
+
+#include "moteur_jeu.h"
 
 #include "astarcarte.h"
 //constructeur destructeur
@@ -194,27 +206,26 @@ bool pas_de_porte_autour(carte *crte, int x,int y)
 //Fonction pour tester si du mobilier existe autour de la position.
 bool pas_de_mobilier_autour(carte *crte, int x,int y)
 {
-	
-	
+		
 	for(register int i=0;i<NB_MAX_ACTEUR;i++)
 	{
 		if(crte->acteur_tab[i]!=NULL)
 		{
-			
-			 if(crte->acteur_tab[i]->x-1==(x-1) && crte->acteur_tab[i]->y==y )
+		//	printf("x %d,y %d xb %d yb %d\n test %d",crte->acteur_tab[i]->x,crte->acteur_tab[i]->y,x,y,(crte->acteur_tab[i]->x-1)==(x-1) && crte->acteur_tab[i]->y==y  );
+	
+			 if((crte->acteur_tab[i]->x)==(x-1) && crte->acteur_tab[i]->y==y )
 			 {
-			 	
 			 	return false;
 			 }	
-			 if(crte->acteur_tab[i]->x+1==x+1 && crte->acteur_tab[i]->y==y )
+			 if(crte->acteur_tab[i]->x==x+1 && crte->acteur_tab[i]->y==y )
 			 {
 			 	return false;
 			 }
-			  if(crte->acteur_tab[i]->x==x && crte->acteur_tab[i]->y+1==y+1 )
+			  if(crte->acteur_tab[i]->x==x && crte->acteur_tab[i]->y==y+1 )
 			 {
 			 	return false;
 			 }
-			  if(crte->acteur_tab[i]->x==x && crte->acteur_tab[i]->y-1==y-1 )
+			  if(crte->acteur_tab[i]->x==x && crte->acteur_tab[i]->y==y-1 )
 			 {
 			 	return false;
 			 }
@@ -402,7 +413,7 @@ carte *creer_carte( int profondeur,int taille_piece, int occupation)
 		 	}
 	     	
 	     	
-	 	}while(abs(py1-py2)<5 || py2>=res->y-3 || py1<2);
+	 	}while(abs(py1-py2)<3 || py2>=res->y-3 || py1<2);
 		
 		 do{
 	        px1=piece[i*4]+ genrand_int32()%(piece[i*4+2]-piece[i*4]+1);
@@ -500,7 +511,32 @@ carte *creer_carte( int profondeur,int taille_piece, int occupation)
 	 		
 	 	}
 	 }
+//
+
+	for(int i=0;i<20;i++ )
+	 {
+	 	
+	 	
 	 
+	
+		recuperer_pos_porte_aleatoire(res,2,2,res->x,res->y-2,&xporte1,&yporte1);
+		recuperer_pos_porte_aleatoire(res,2,2,res->x,res->y-2,&xporte2,&yporte2);
+			printf("\n resultbis x1%d y1%d x2%d y2%d  %d\n",piece[salle1*4],piece[salle1*4+1],piece[salle1*4+2],piece[salle1*4+3],xporte1); 
+	 	if(xporte1!=-1  )
+	 	{
+	 		printf("x1%d y1%d x2%d y2%d",xporte1,yporte1,xporte2,yporte2);
+	 		copie_tile(&tilep1,&res->donnee_carte[yporte1][xporte1]);
+	 		copie_tile(&tilep2,&res->donnee_carte[yporte2][xporte2]);
+	 		placer_tile(&res->donnee_carte[yporte1][xporte1],TILE_SOL);
+	 		placer_tile(&res->donnee_carte[yporte2][xporte2],TILE_SOL);
+	 		astar(res, xporte1, yporte1, xporte2,yporte2);
+	 		copie_tile(&res->donnee_carte[yporte1][xporte1],&tilep1);
+	 		copie_tile(&res->donnee_carte[yporte2][xporte2],&tilep2);
+	 		
+	 		
+	 	}
+	 }	 
+////////////////////////////////
 	
 //	 astar(res, 1, 30, 45,30);
  decrouvrir_toute_carte(res);
@@ -571,7 +607,7 @@ int creer_salle_pcsecu(carte *crte, int x1, int y1, int x2, int y2,int orientati
 		
 		for(int j=x1;j<=x2;j++)
 		{
-			if(genrand_int32()%101>5)
+			if(genrand_int32()%101<93)
 			placer_tile(&crte->donnee_carte[i][j],TILE_SOL);
 			else
 			placer_tile(&crte->donnee_carte[i][j],TILE_SOL_BRISE);
@@ -584,22 +620,26 @@ int creer_salle_pcsecu(carte *crte, int x1, int y1, int x2, int y2,int orientati
 			placer_tile(&crte->donnee_carte[i][x2],TILE_MUR);
 	}
 
-	if(abs(x2-x1)*abs(y2-y1)>=36)
+	if(abs(x2-x1)*abs(y2-y1)>=40)
 	{
 		if(genrand_int32()%101<60)
 		deux_console=true;
 		
 		if(genrand_int32()%101<50)
 		bureau=true;
-		nb_porte=2+genrand_int32()%3;
+		if(genrand_int32()%101<50)
+		table=true;
+		
+		nb_porte=2+genrand_int32()%2;
 	}	
-	else if(abs(x2-x1)*abs(y2-y1)>25)
+	else if(abs(x2-x1)*abs(y2-y1)>20)
 	{
+		
 		rack_arme=true;
 		
 		if(genrand_int32()%101<30)
 		table=true;
-	    nb_porte=1+genrand_int32()%3;
+	    nb_porte=1+genrand_int32()%2;
 	}
 	
 	// position de la premiere console
@@ -656,7 +696,7 @@ int creer_salle_pcsecu(carte *crte, int x1, int y1, int x2, int y2,int orientati
 
 	
 	//position des portes
-	for(int i=0;i<nb_porte;i++)
+	for(int i=0;i<=nb_porte;i++)
 	{
 		
 		do
@@ -670,7 +710,22 @@ int creer_salle_pcsecu(carte *crte, int x1, int y1, int x2, int y2,int orientati
 			   || coin_de_salle(crte, x1+x_console,y1+1+y_mobilier));
 		
 			printf("x%d, y%d    %d\n", x1+x_console,y1+1+y_mobilier,pas_de_mobilier_autour(crte, x1+x_console ,y_mobilier+y1+1) );
+		    
+			if(genrand_int32()%101<30)
 			placer_tile(&crte->donnee_carte[y1+1+y_mobilier][x1+x_console],TILE_PORTE_FRAGILE);
+			else
+			placer_tile(&crte->donnee_carte[y1+1+y_mobilier][x1+x_console],TILE_PORTE_NORMALE);
+			
+			//positionnement des portes
+			if(genrand_int32()%101<85)// GESTION DU VERROUILLAGE DE LA PORTE
+			{
+				crte->donnee_carte[y1+1+y_mobilier][x1+x_console].verrouille=true;
+			}
+			else if(genrand_int32()%101<8)// GESTION DE L'OUVERTURE DE LA PORTE
+			{
+				ouvrir_fermer_porte(&crte->donnee_carte[y1+1+y_mobilier][x1+x_console]);
+			}
+			
 	}
 	
 	 for(int i=0;i<NB_MAX_ACTEUR;i++)
@@ -679,7 +734,7 @@ int creer_salle_pcsecu(carte *crte, int x1, int y1, int x2, int y2,int orientati
 	 	printf("act %d x%d  y%d\n",i,crte->acteur_tab[i]->x,crte->acteur_tab[i]->y);
 	 	
 	 }
-	  printf("test %d", pas_de_mobilier_autour(crte, 30,40));
+
 }
 
 
@@ -697,26 +752,143 @@ int creer_salle_stocks(carte *crte, int x1, int y1, int x2, int y2,int orientati
 	*********************************************************************************/
 	
 	stock_type=genrand_int32()%4;//choix du type de stock
-	
+
+	// REMPLISSAGE DE LA BASE DE LA PIECE	
+	for(int i=y1;i<=y2;i++)
+	{
+		for(int j=x1;j<=x2;j++)
+		{
+			placer_tile(&crte->donnee_carte[i][j],TILE_SOL);
+				//placer_tile(&crte->donnee_carte[y1][i],TILE_MUR);
+		//	placer_tile(&crte->donnee_carte[y1+1][i],TILE_SOL);
+		if(i==y1 || i==y2)placer_tile(&crte->donnee_carte[i][j],TILE_MUR);
+		}
+		placer_tile(&crte->donnee_carte[i][x1],TILE_MUR);
+		placer_tile(&crte->donnee_carte[i][x2],TILE_MUR);
+	}
+	///////////////////////////////////
+			
 	if(abs(x2-x1)*abs(y2-y1)<= 20)
 	{
 		//*********PETIT STOCK TOUT EN LONGUEUR *********/
-		if(abs(x2-x1)==3 || abs(y2-y1)==3) 	
+		if(abs(x2-x1)==2 || abs(y2-y1)==2) 	
 		{
 			// LONGUEUR SELON X ///////////////////////////////////////
 			if((y2-y1)==3)
 			{
-				for(int i=x1;i<=x2;i++)
+			/*	for(int i=x1;i<=x2;i++)
 				{
 					placer_tile(&crte->donnee_carte[y1][i],TILE_MUR);
 					placer_tile(&crte->donnee_carte[y1+1][i],TILE_SOL);
 					placer_tile(&crte->donnee_carte[y2][i],TILE_MUR);
 					if(i==x1 || i==x2)placer_tile(&crte->donnee_carte[y1+1][i],TILE_MUR);
 				}	
-			     
+			  */   
 			    // Si la longueur est >= a 6  porte au milieu 2 etagere au bout
-			    if(x2-x1>=6)
+			    if(x2-x1>=5)
 			    {
+			    	orien=genrand_int32()%2;//tirage de l orientation 
+			    	if(orien==0)nb1=y1;
+			    	if(orien==1)nb1=y2;
+			    	orien=genrand_int32()%(x2-x1-4);
+			    	nb2=x1+2+orien;
+			    	
+			    	 	switch(stock_type)
+					        {
+					        	case 1://stock medical
+					        			
+					        			
+			    						if(genrand_int32()%101<50)
+			    						{
+			    							//mise en place de l'armoire a medoc
+						        			act=placer_mobilier(x1+1, y1+1,ACTEUR_ARMOIRE_MEDIC);
+				    						ajouter_acteur(crte,act);
+				    						  
+				    						  if(genrand_int32()%101<30)
+				    						  {
+				    						  	act=placer_mobilier(x2-1, y1+1,ACTEUR_BOUTEILLE_GAZ);
+				    							ajouter_acteur(crte,act);
+				    						  }
+				    						  else
+				    						  {
+				    						  	act=placer_mobilier(x2-1, y1+1,ACTEUR_ARMOIRE_MEDIC);
+				    							ajouter_acteur(crte,act);
+				    						  }
+				    						
+			    						}
+			    						else
+			    						{
+			    							//mise en place de l'armoire a medoc
+					        				act=placer_mobilier(x2-1, y1+1,ACTEUR_ARMOIRE_MEDIC);
+			    							ajouter_acteur(crte,act);
+			    							
+			    							if(genrand_int32()%101<30)
+				    						  {
+				    						  	act=placer_mobilier(x1+1, y1+1,ACTEUR_BOUTEILLE_GAZ);
+				    							ajouter_acteur(crte,act);
+				    						  }
+				    						  else
+				    						  {
+				    						  	act=placer_mobilier(x1+1, y1+1,ACTEUR_ARMOIRE_MEDIC);
+				    							ajouter_acteur(crte,act);
+				    						  }
+				    							
+			    						
+			    						}
+			    						// mise en place de la porte
+			    						    if(genrand_int32()%101<40)
+			    						    {
+			    						    	placer_tile(&crte->donnee_carte[nb1][nb2],TILE_PORTE_FRAGILE);
+			    						    }
+			    						    else
+			    						    {
+			    						    	placer_tile(&crte->donnee_carte[nb1][nb2],TILE_PORTE_NORMALE);
+			    						    }
+			    							
+			    							if(genrand_int32()%101<30)// GESTION DU VERROUILLAGE DE LA PORTE
+			    							{
+			    								crte->donnee_carte[nb1][nb2].verrouille=true;
+			    							}
+			    							else if(genrand_int32()%101<5)// GESTION DE L'OUVERTURE DE LA PORTE
+			    							{
+			    								ouvrir_fermer_porte(&crte->donnee_carte[nb1][nb2]);
+			    							}
+												
+			    						   
+					        	break;
+					        	case 2:// stock militaire
+					        			//mise en place de l'armoire a medoc
+					        		
+			    						   act=placer_mobilier(x2-1, y1+1,ACTEUR_RACK_ARME);
+			    						   ajouter_acteur(crte,act);
+			    						   act=placer_mobilier(x1+1, y1+1,ACTEUR_RACK_ARME);
+			    						   ajouter_acteur(crte,act);
+			    						   
+			    						   // mise en place de la porte
+			    						    if(genrand_int32()%101<60)
+			    						    {
+			    						    	placer_tile(&crte->donnee_carte[nb1][nb2],TILE_PORTE_NORMALE);
+			    						    }
+			    						    else
+			    						    {
+			    						    	placer_tile(&crte->donnee_carte[nb1][nb2],TILE_PORTE_BLINDE);
+			    						    }
+			    							
+			    							if(genrand_int32()%101<90)// GESTION DU VERROUILLAGE DE LA PORTE
+			    							{
+			    								crte->donnee_carte[nb1][nb2].verrouille=true;
+			    							}
+					        	break;
+					        	
+					        	case 3://stock divers
+					        		//mise en place de l'armoire a medoc
+					        			act=placer_mobilier(x2-1, y1+1,ACTEUR_ETAGERE);
+			    						ajouter_acteur(crte,act);
+			    						act=placer_mobilier(x1+1, y1+1,ACTEUR_ETAGERE);
+			    						ajouter_acteur(crte,act);
+			    						  	
+					        	break;
+					        }
 			    }
 			    // Si la longueur <6 porte a un des bout/////////////////////////////////////
 			    else{
@@ -811,21 +983,221 @@ int creer_salle_stocks(carte *crte, int x1, int y1, int x2, int y2,int orientati
 			// LONGUEUR SELON Y
 			else
 			{
-				for(int i=y1;i<=y2;i++)
+/*				for(int i=y1;i<=y2;i++)
 				{
 					placer_tile(&crte->donnee_carte[i][x1],TILE_MUR);
 					placer_tile(&crte->donnee_carte[i][x1+1],TILE_SOL);
 					placer_tile(&crte->donnee_carte[i][x2],TILE_MUR);
 					if(i==y1 || i==y2)placer_tile(&crte->donnee_carte[i][x1+1],TILE_MUR);
 				}	
+*/				
 				
+				  // Si la longueur est >= a 6  porte au milieu 2 etagere au bout
+			    if(y2-y1>=5)
+			    {
+			    	orien=genrand_int32()%2;//tirage de l orientation 
+			    	if(orien==0)nb1=x1;
+			    	if(orien==1)nb1=x2;
+			    	orien=genrand_int32()%(y2-y1-4);
+			    	nb2=y1+2+orien;
+			    	
+			    	 	switch(stock_type)
+					        {
+					        	case 1://stock medical
+					        			
+					        			
+			    						if(genrand_int32()%101<50)
+			    						{
+			    							//mise en place de l'armoire a medoc
+						        			act=placer_mobilier(x1+1, y1+1,ACTEUR_ARMOIRE_MEDIC);
+				    						ajouter_acteur(crte,act);
+				    						  
+				    						  if(genrand_int32()%101<30)
+				    						  {
+				    						  	act=placer_mobilier(x1+1, y2-1,ACTEUR_BOUTEILLE_GAZ);
+				    							ajouter_acteur(crte,act);
+				    						  }
+				    						  else
+				    						  {
+				    						  	act=placer_mobilier(x1+1, y2-1,ACTEUR_ARMOIRE_MEDIC);
+				    							ajouter_acteur(crte,act);
+				    						  }
+				    						
+			    						}
+			    						else
+			    						{
+			    							//mise en place de l'armoire a medoc
+					        				act=placer_mobilier(x1+1, y2-1,ACTEUR_ARMOIRE_MEDIC);
+			    							ajouter_acteur(crte,act);
+			    							
+			    							if(genrand_int32()%101<30)
+				    						  {
+				    						  	act=placer_mobilier(x1+1, y1+1,ACTEUR_BOUTEILLE_GAZ);
+				    							ajouter_acteur(crte,act);
+				    						  }
+				    						  else
+				    						  {
+				    						  	act=placer_mobilier(x1+1, y1+1,ACTEUR_ARMOIRE_MEDIC);
+				    							ajouter_acteur(crte,act);
+				    						  }
+				    							
+			    						
+			    						}
+			    						// mise en place de la porte
+			    						    if(genrand_int32()%101<40)
+			    						    {
+			    						    	placer_tile(&crte->donnee_carte[nb2][nb1],TILE_PORTE_FRAGILE);
+			    						    }
+			    						    else
+			    						    {
+			    						    	placer_tile(&crte->donnee_carte[nb2][nb1],TILE_PORTE_NORMALE);
+			    						    }
+			    							
+			    							if(genrand_int32()%101<30)// GESTION DU VERROUILLAGE DE LA PORTE
+			    							{
+			    								crte->donnee_carte[nb2][nb1].verrouille=true;
+			    							}
+			    							else if(genrand_int32()%101<5)// GESTION DE L'OUVERTURE DE LA PORTE
+			    							{
+			    								ouvrir_fermer_porte(&crte->donnee_carte[nb2][nb1]);
+			    							}
+												
+			    						   
+					        	break;
+					        	case 2:// stock militaire
+					        			//mise en place de l'armoire a medoc
+					        		
+			    						   act=placer_mobilier(x1+1, y1+1,ACTEUR_RACK_ARME);
+			    						   ajouter_acteur(crte,act);
+			    						   act=placer_mobilier(x1+1, y2-1,ACTEUR_RACK_ARME);
+			    						   ajouter_acteur(crte,act);
+			    						   
+			    						   // mise en place de la porte
+			    						    if(genrand_int32()%101<60)
+			    						    {
+			    						    	placer_tile(&crte->donnee_carte[nb2][nb1],TILE_PORTE_NORMALE);
+			    						    }
+			    						    else
+			    						    {
+			    						    	placer_tile(&crte->donnee_carte[nb2][nb1],TILE_PORTE_BLINDE);
+			    						    }
+			    							
+			    							if(genrand_int32()%101<90)// GESTION DU VERROUILLAGE DE LA PORTE
+			    							{
+			    								crte->donnee_carte[nb2][nb1].verrouille=true;
+			    							}
+					        	break;
+					        	
+					        	case 3://stock divers
+					        		//mise en place de l'armoire a medoc
+					        			act=placer_mobilier(x1+1, y2-1,ACTEUR_ETAGERE);
+			    						ajouter_acteur(crte,act);
+			    						act=placer_mobilier(x1+1, y1+1,ACTEUR_ETAGERE);
+			    						ajouter_acteur(crte,act);
+			    						  	
+					        	break;
+					        }
+			    }
+			    // Si la longueur <6 porte a un des bout/////////////////////////////////////
+			    else{
+			    
+						    orien=genrand_int32()%2;//tirage de l orientation
+						        if(orien==0)
+			        			{
+			        			  nb1=y1+1;
+								  nb2=y2;	
+			        			}
+			        			else
+			        			{
+			        				nb1=y2-1;
+			        				nb2=y1;
+			        			}
+							switch(stock_type)
+					        {
+					        	case 1://stock medical
+					        			
+					        			//mise en place de l'armoire a medoc
+					        			act=placer_mobilier(x1+1, nb1,ACTEUR_ARMOIRE_MEDIC);
+			    						ajouter_acteur(crte,act);
+			    						    // mise en place de la porte
+			    						    if(genrand_int32()%101<40)
+			    						    {
+			    						    	placer_tile(&crte->donnee_carte[nb2][x1+1],TILE_PORTE_FRAGILE);
+			    						    }
+			    						    else
+			    						    {
+			    						    	placer_tile(&crte->donnee_carte[nb2][x1+1],TILE_PORTE_NORMALE);
+			    						    }
+			    							
+			    							if(genrand_int32()%101<30)// GESTION DU VERROUILLAGE DE LA PORTE
+			    							{
+			    								crte->donnee_carte[nb2][x1+1].verrouille=true;
+			    							}
+			    							else if(genrand_int32()%101<5)// GESTION DE L'OUVERTURE DE LA PORTE
+			    							{
+			    								ouvrir_fermer_porte(&crte->donnee_carte[nb2][x1+1]);
+			    							}
+			    							
+			    						
+					        	break;
+					        	case 2:// stock militaire
+					        			//mise en place de l'armoire a medoc
+					        			act=placer_mobilier( x1+1,nb1,ACTEUR_RACK_ARME);
+			    						ajouter_acteur(crte,act);
+			    						    // mise en place de la porte
+			    						    if(genrand_int32()%101<60)
+			    						    {
+			    						    	placer_tile(&crte->donnee_carte[nb2][x1+1],TILE_PORTE_NORMALE);
+			    						    }
+			    						    else
+			    						    {
+			    						    	placer_tile(&crte->donnee_carte[nb2][x1+1],TILE_PORTE_BLINDE);
+			    						    }
+			    							
+			    							if(genrand_int32()%101<90)// GESTION DU VERROUILLAGE DE LA PORTE
+			    							{
+			    								crte->donnee_carte[nb2][x1+1].verrouille=true;
+			    							}
+					        	
+					        	break;
+					        	case 3://stock divers
+					        		//mise en place de l'armoire a medoc
+					        			act=placer_mobilier(nb1, y1+1,ACTEUR_ETAGERE);
+			    						ajouter_acteur(crte,act);
+			    						    // mise en place de la porte
+			    						    if(genrand_int32()%101<50)
+			    						    {
+			    						    	placer_tile(&crte->donnee_carte[y1+1][nb2],TILE_PORTE_FRAGILE);
+			    						    }
+			    						    else
+			    						    {
+			    						    	placer_tile(&crte->donnee_carte[y1+1][nb2],TILE_PORTE_NORMALE);
+			    						    }
+			    							
+			    							if(genrand_int32()%101<25)// GESTION DU VERROUILLAGE DE LA PORTE
+			    							{
+			    								crte->donnee_carte[y1+1][nb2].verrouille=true;
+			    							}
+			    							else if(genrand_int32()%101<8)// GESTION DE L'OUVERTURE DE LA PORTE
+			    							{
+			    								ouvrir_fermer_porte(&crte->donnee_carte[y1+1][nb2]);
+			    							}
+			    							
+					        	break;
+					        }
+			    }
+			    ///FIN LONGUEUR SELON Y///////////////////////////////////////
 			}
 			
 			
 		}
-		
+		else
+		{
+			
+		}
 		/***********************************************/
 	}
+	else if(abs(x2-x1)*abs(y2-y1)<= 30)
 	
 	
 	
@@ -901,8 +1273,8 @@ int validite_deplacement(carte *crte,int x,int y, int dx,int dy)
 			{
 				if(crte->acteur_tab[i]->x==x+dx && crte->acteur_tab[i]->y==y+dy)
 				{
-					if(crte->acteur_tab[i]->acteur_type<= ACTEUR_LIT)return 3;
-					if(crte->acteur_tab[i]->acteur_type> ACTEUR_LIT && est_vivant(crte->acteur_tab[i]))return 4;
+					if(crte->acteur_tab[i]->acteur_type<= ACTEUR_LIT && crte->acteur_tab[i]->bloquant==true)return 3;
+					if(crte->acteur_tab[i]->acteur_type> ACTEUR_LIT && est_vivant(crte->acteur_tab[i]))return 4;//gestion des personnages vivants
 				}
 			}	
 		}	
@@ -916,7 +1288,7 @@ int validite_deplacement(carte *crte,int x,int y, int dx,int dy)
 acteur* obtenir_ennemi(carte *crte,int x, int y)
 {
 	
-		for(int i=0;i<NB_MAX_ACTEUR ;i++)
+		for(register int i=0;i<NB_MAX_ACTEUR ;i++)
 		{
 			if(crte->acteur_tab[i]!=NULL)
 			{
@@ -928,6 +1300,26 @@ acteur* obtenir_ennemi(carte *crte,int x, int y)
 		}	
 	
 return NULL;	
+}
+
+
+// Fonction pour recupererun pointeur sur l eventuel
+// moilier present en x y
+acteur *obtenir_mobilier(carte *crte,int x, int y)
+{
+			for(int i=0;i<NB_MAX_ACTEUR ;i++)
+		{
+			if(crte->acteur_tab[i]!=NULL)
+			{
+				if(crte->acteur_tab[i]->x==x && crte->acteur_tab[i]->y==y)
+				{
+					if(crte->acteur_tab[i]->acteur_type<= ACTEUR_LIT &&  crte->acteur_tab[i]->bloquant==true )return crte->acteur_tab[i];
+		
+				}
+			}	
+		}	
+	
+return NULL;
 }
 
 
@@ -1060,3 +1452,501 @@ carte * cree_carte_test()
 	crt->objet_tab[2]=creer_objet(30, 30, OBJ_MEDIPACK);	
 return crt;	
 }
+
+
+
+/*****************************************************************************
+*********************** INTERACTION DU MOBILIER AVEC LA CARTE ***************/
+
+//int effectuer_explosion(carte *crte, int x, int y, int rayon, int max_dmg);
+//
+//Fonction pour faire exploser les grenades ou les bouteilles de gaz
+// applique des degats a l'ensemble des acteur autour de l'explosion
+// avec un facteur 1/r^2 pour plus de realisme.
+// Le degat sont ensuite infligés aux tiles comme les portes les vites etc.
+int effectuer_explosion(carte *crte, joueur *ply1, int x, int y, int rayon, int max_dmg)
+{
+	int retour=0;
+	int dommage=0;
+	bool mort=false;
+	char message[512];
+	
+	/*******************TRAITEMENT DES ACTEUR *******************
+	************************************************************/
+	for(int i=0;i<NB_MAX_ACTEUR;i++)
+	{
+		
+	 if(crte->acteur_tab[i]!=NULL)
+	 {           
+	               printf("i %d\n",i);    
+	 	 		 // SI L ACTEUR EST DANS LE RAYON DE L'EXPLOSION
+				 if((x-crte->acteur_tab[i]->x)*(x-crte->acteur_tab[i]->x)+
+				  (y-crte->acteur_tab[i]->y)*(y-crte->acteur_tab[i]->y)<=rayon*rayon )
+				{
+				
+				    if(crte->acteur_tab[i]->acteur_type==ACTEUR_BOUTEILLE_GAZ &&  est_vivant(crte->acteur_tab[i]))
+				    {
+				    	crte->acteur_tab[i]->vie-=max_dmg/((x-crte->acteur_tab[i]->x)*(x-crte->acteur_tab[i]->x)+
+				  											(y-crte->acteur_tab[i]->y)*(y-crte->acteur_tab[i]->y));
+				  		
+				  		//GESTION DE L EXPLOSION POSSIBLE
+				  		if(crte->acteur_tab[i]->vie<=0)
+				  		{
+				  		  moteur_jeu::ajouter_mess_console("L'explosion detruit la bouteille de gaz.",al_map_rgb(255,0,0));
+				  		if(detruire_bouteille_gaz(crte,crte->acteur_tab[i],ply1)==1)retour=1;
+						}
+						else
+						{
+						  moteur_jeu::ajouter_mess_console("L'explosion endommage la bouteille de gaz.",al_map_rgb(255,0,0));	
+						}
+				    }
+				    else if(crte->acteur_tab[i]->acteur_type==ACTEUR_CONTENEUR_ACIDE &&  est_vivant(crte->acteur_tab[i]))
+				    {
+				    	crte->acteur_tab[i]->vie-=max_dmg/((x-crte->acteur_tab[i]->x)*(x-crte->acteur_tab[i]->x)+
+				  											(y-crte->acteur_tab[i]->y)*(y-crte->acteur_tab[i]->y));
+				  	    if(crte->acteur_tab[i]->vie<=0)
+				  	    {
+				  	    moteur_jeu::ajouter_mess_console("L'explosion eventre le conteneur d'acide!",al_map_rgb(255,0,0));
+						detruire_conteneur_acide(crte,crte->acteur_tab[i]);
+				  		}
+				  		else
+				  		{
+				  		  moteur_jeu::ajouter_mess_console("Le recipient d'acide est endommage par l'explosion.",al_map_rgb(255,0,0));
+					  	}
+					
+					}
+				    else if(crte->acteur_tab[i]->acteur_type>=ACTEUR_SCIENTIFIQUE_BASE &&  est_vivant(crte->acteur_tab[i]))
+				    {
+				    	dommage=max_dmg/((x-crte->acteur_tab[i]->x)*(x-crte->acteur_tab[i]->x)+
+				  											(y-crte->acteur_tab[i]->y)*(y-crte->acteur_tab[i]->y));
+				  	
+					  	crte->acteur_tab[i]->vie-=dommage;
+					  	
+					  	//gestion de la mort
+					  	if(est_vivant(crte->acteur_tab[i])==false)mort=true;
+					  	
+					  	if(mort)
+					  	{
+					  		sprintf(message,"Le souffle de l'explosion tue un %s",crte->acteur_tab[i]->acteur_nom);
+					  		ajout_adrenaline(ply1,0,ply1->adrenaline_max/20,false);
+					  		transformer_en_cadavre(crte->acteur_tab[i]);
+						}
+					  	else
+					  	{
+					  		sprintf(message,"Le souffle de l'explosion blesse un %s",crte->acteur_tab[i]->acteur_nom);
+					  		ajout_adrenaline(ply1,0,2,false);
+						}
+						
+						moteur_jeu::ajouter_mess_console(message,al_map_rgb(255,0,0));
+									
+					  	mort=false;
+				    }
+				
+				}  
+				  
+	 }	
+		
+	}
+	
+	/*******************TRAITEMENT DU JOUEUR ********************
+	************************************************************/
+		 if((x-ply1->x)*(x-ply1->x)+
+				  (y-ply1->y)*(y-ply1->y)<=rayon*rayon )
+		 {
+		 	
+		 	ply1->vie-=max_dmg/((x-ply1->x)*(x-ply1->x)+
+				  					(y-ply1->y)*(y-ply1->y));
+				  					
+		   if(ply1->vie<=0)
+		   retour=1;
+		 	
+		 }		
+	
+	/*******************TRAITEMENT DES TILES*********************
+	*************************************************************/
+	int i=y-rayon;
+	int j;
+	int limx=x+rayon;
+	int limy=y+rayon;
+	
+	if(i<0)i=0;
+	if(limx>=crte->x)limx=crte->x-1;
+	if(limy>=crte->y)limy=crte->y-1;
+	
+	
+	for(;i<=limy;i++)
+	{
+		j=y-rayon;
+		if(j<0)j=0;
+		
+		for(int j=x-rayon;j<limx;j++)
+		{
+			if((x-j)*(x-j)+(y-i)*(y-i)<=rayon*rayon) // Si le tile est dans le rayon d'explosion
+			{
+				switch(crte->donnee_carte[i][j].type)
+				{
+					case TILE_SOL:
+						if(genrand_int32()%101<30)
+						{
+							remplacer_tile(&crte->donnee_carte[i][j],TILE_SOL_BRISE);
+						}
+						
+					break;
+					//////
+					case TILE_VITRE:
+						remplacer_tile(&crte->donnee_carte[i][j],TILE_SOL_VERRE);
+						
+					break;
+					//////
+					case TILE_PORTE_FRAGILE:
+					case TILE_PORTE_NORMALE:
+						remplacer_tile(&crte->donnee_carte[i][j],TILE_SOL);
+						
+					break;
+					//////
+					case TILE_PORTE_BLINDE:
+						if(genrand_int32()%101<90)
+						{
+							if(genrand_int32()%101<30)
+							{
+								remplacer_tile(&crte->donnee_carte[i][j],TILE_SOL_BRISE);
+							}
+							else
+								remplacer_tile(&crte->donnee_carte[i][j],TILE_SOL);
+
+						}
+					break;
+					//////
+					case TILE_BARREAUX:
+						if(genrand_int32()%101<90)
+						{
+								if(genrand_int32()%101<30)
+								{
+									remplacer_tile(&crte->donnee_carte[i][j],TILE_SOL_BRISE);
+								}
+								else
+									remplacer_tile(&crte->donnee_carte[i][j],TILE_SOL);
+						}
+					break;
+					//////
+					
+				}
+			}
+		}
+	}
+	
+	return retour;
+}
+
+//int repandre_acide(carte *crte,int x, int y);
+//
+// Fontion pour remplacer le sol autour de bouteilles d'acide
+// par des flaques de liquide corrosif 1 carreau autour de la position x,y
+int repandre_acide(carte *crte,int x, int y)
+{
+	
+	if(crte->donnee_carte[y][x].type==TILE_SOL || 
+	   crte->donnee_carte[y][x].type==TILE_SOL_BRISE ||
+	   crte->donnee_carte[y][x].type==TILE_SOL_VERRE)
+	remplacer_tile(&crte->donnee_carte[y][x],TILE_SOL_ACIDE);
+	
+	if(crte->donnee_carte[y-1][x-1].type==TILE_SOL || 
+	   crte->donnee_carte[y-1][x-1].type==TILE_SOL_BRISE ||
+	   crte->donnee_carte[y-1][x-1].type==TILE_SOL_VERRE)
+	remplacer_tile(&crte->donnee_carte[y-1][x-1],TILE_SOL_ACIDE);
+	
+	if(crte->donnee_carte[y-1][x].type==TILE_SOL || 
+	   crte->donnee_carte[y-1][x].type==TILE_SOL_BRISE ||
+	   crte->donnee_carte[y-1][x].type==TILE_SOL_VERRE)
+	remplacer_tile(&crte->donnee_carte[y-1][x],TILE_SOL_ACIDE);
+
+	if(crte->donnee_carte[y-1][x+1].type==TILE_SOL || 
+	   crte->donnee_carte[y-1][x+1].type==TILE_SOL_BRISE ||
+	   crte->donnee_carte[y-1][x+1].type==TILE_SOL_VERRE)
+	remplacer_tile(&crte->donnee_carte[y-1][x+1],TILE_SOL_ACIDE);
+	
+	if(crte->donnee_carte[y][x-1].type==TILE_SOL || 
+	   crte->donnee_carte[y][x-1].type==TILE_SOL_BRISE ||
+	   crte->donnee_carte[y][x-1].type==TILE_SOL_VERRE)
+	remplacer_tile(&crte->donnee_carte[y][x-1],TILE_SOL_ACIDE);
+	
+	if(crte->donnee_carte[y][x+1].type==TILE_SOL || 
+	   crte->donnee_carte[y][x+1].type==TILE_SOL_BRISE ||
+	   crte->donnee_carte[y][x+1].type==TILE_SOL_VERRE)
+	remplacer_tile(&crte->donnee_carte[y][x+1],TILE_SOL_ACIDE);
+	
+	if(crte->donnee_carte[y+1][x-1].type==TILE_SOL || 
+	   crte->donnee_carte[y+1][x-1].type==TILE_SOL_BRISE ||
+	   crte->donnee_carte[y+1][x-1].type==TILE_SOL_VERRE)
+	remplacer_tile(&crte->donnee_carte[y+1][x-1],TILE_SOL_ACIDE);
+
+	if(crte->donnee_carte[y+1][x].type==TILE_SOL || 
+	   crte->donnee_carte[y+1][x].type==TILE_SOL_BRISE ||
+	   crte->donnee_carte[y+1][x].type==TILE_SOL_VERRE)
+	remplacer_tile(&crte->donnee_carte[y+1][x],TILE_SOL_ACIDE);
+
+
+	if(crte->donnee_carte[y+1][x+1].type==TILE_SOL || 
+	   crte->donnee_carte[y+1][x+1].type==TILE_SOL_BRISE ||
+	   crte->donnee_carte[y+1][x+1].type==TILE_SOL_VERRE)
+	remplacer_tile(&crte->donnee_carte[y+1][x+1],TILE_SOL_ACIDE);
+
+	return 0;	
+}
+
+
+
+//int detruire_bouteille_gaz(carte *crte,acteur *act);
+//
+//Fonction pour détruire une bouteille de gaz.
+// transforme l'affichage, la caracteristique passable ou non
+// et genere une explosion
+//
+//retourne 0 si ras
+// retoune 1 si l'explosion tue le joueur
+int detruire_bouteille_gaz(carte *crte,acteur *act,joueur *ply1)
+{
+	for(int i=0;i<NB_MAX_OBJET;i++)
+	{
+		
+        if(crte->acteur_tab[i]==act)
+		{
+			
+			act->bmp_index=act->bmp_index_detruit;
+			act->bloquant=false;
+			
+			if(effectuer_explosion(crte, ply1, crte->acteur_tab[i]->x, crte->acteur_tab[i]->y, RAYON_EXPLOSION, DEGAT_EXPLOSION)==1)
+			return 1;
+			else
+			return 0;
+
+		}		
+		
+	}
+	return 0;
+}
+int detruire_bouteille_gaz(carte *crte,int index,joueur *ply1)
+{
+	if(crte->acteur_tab[index]!=NULL && 
+	   crte->acteur_tab[index]->acteur_type==ACTEUR_BOUTEILLE_GAZ)
+	{
+			crte->acteur_tab[index]->bmp_index=crte->acteur_tab[index]->bmp_index_detruit;
+			crte->acteur_tab[index]->bloquant=false;
+			
+			if(effectuer_explosion(crte, ply1, crte->acteur_tab[index]->x, crte->acteur_tab[index]->y, RAYON_EXPLOSION, DEGAT_EXPLOSION)==1);
+			return 1;
+	}
+	return 0;
+}
+
+ 
+
+// int detruire_conteneur_acide(carte *crte,acteur *act);
+//
+//Fonction pour détruire un conteneur d'acide.
+// transforme l'affichage, la caracteristique passable ou non
+// et repand l'acide surle sol
+//
+int detruire_conteneur_acide(carte *crte,acteur *act)
+{
+	
+	for(int i=0;i<NB_MAX_OBJET;i++)
+	{
+		
+        if(crte->acteur_tab[i]==act)
+		{
+			
+			act->bmp_index=act->bmp_index_detruit;
+			act->bloquant=false;
+			
+			repandre_acide(crte,act->x,act->y);
+			
+			return 1;
+			
+		}		
+		
+	}
+	
+	return 0;
+}
+
+int detruire_conteneur_acide(carte *crte,int index)
+{
+	
+	if(crte->acteur_tab[index]!=NULL && 
+	   crte->acteur_tab[index]->acteur_type==ACTEUR_CONTENEUR_ACIDE)
+	{
+			crte->acteur_tab[index]->bmp_index=crte->acteur_tab[index]->bmp_index_detruit;
+			crte->acteur_tab[index]->bloquant=false;
+			
+			repandre_acide(crte,crte->acteur_tab[index]->x,crte->acteur_tab[index]->y);
+			
+			return 1;
+	}
+
+return 0;
+}
+
+ 
+ 
+ 
+
+ /****************************************************************
+ *****************INTERACTION DES ACTEURS AVEC LA CARTE *********/
+ 
+ //int maj_degat_acide(joueur *jr);
+//
+//Fonction pour ajouter d'eventuels degat du
+// a l'acide.
+// retourne 0 si la santé atteint 0
+// retourne 1 si il y a dégat du a l acide
+// retourne 2 si il n y a pas de dégat du a l acide
+// LES CHAUSSURES PROTEGENT DE L ACIDE MAIS SE DEGRADENT VITE.
+int maj_degat_acide(joueur *jr,carte *crte)
+{
+	char message[512];
+	if(crte->donnee_carte[jr->y][jr->x].type==TILE_SOL_ACIDE)
+	{
+		
+		if(jr->equipement[EQUIPMNT_CHAUSSURE]!=NULL)
+		{
+			jr->equipement[EQUIPMNT_CHAUSSURE]->etat_obj-=DOMMAGE_RESTER_ACIDE;
+			
+			// Prise en compte de la destruction des objets chaussess
+			if(jr->equipement[EQUIPMNT_CHAUSSURE]->etat_obj<=0)
+			{
+				delete jr->equipement[EQUIPMNT_CHAUSSURE];
+				jr->equipement[EQUIPMNT_CHAUSSURE]=NULL;
+				moteur_jeu::ajouter_mess_console("Vos chaussures, gravement attaquees par l'acide, partent en lambeaux.",al_map_rgb(255,255,255));
+ 
+			}
+			else
+			{
+			sprintf(message,"Vos chaussures fondent sous l'effet de l'acide. Etat: %d.", jr->equipement[EQUIPMNT_CHAUSSURE]->etat_obj);
+			moteur_jeu::ajouter_mess_console(message,al_map_rgb(255,255,255));
+			}
+			return 1;
+		}
+		else
+		{
+			jr->vie-=DOMMAGE_RESTER_ACIDE;
+			ajout_adrenaline(jr,DOMMAGE_RESTER_ACIDE,0,false);
+			sprintf(message,"La plante de vos pieds est attaque par l'acide: %d de degats.",DOMMAGE_RESTER_ACIDE);
+			moteur_jeu::ajouter_mess_console(message,al_map_rgb(0,0,255));
+		
+			if(jr->vie<=0)return 0;
+		
+			return 1;
+		}
+		
+	}
+	
+	return 2;
+}
+
+int maj_degat_acide(acteur *act,carte *crte)
+{
+	
+	if(crte->donnee_carte[act->y][act->x].type==TILE_SOL_ACIDE)
+	{
+		
+		if(act->equipement[EQUIPMNT_CHAUSSURE]!=NULL)
+		{
+			act->equipement[EQUIPMNT_CHAUSSURE]->etat_obj-=DOMMAGE_RESTER_ACIDE;
+			
+			// Prise en compte de la destruction des objets chaussess
+			if(act->equipement[EQUIPMNT_CHAUSSURE]->etat_obj<=0)
+			{
+				delete act->equipement[EQUIPMNT_CHAUSSURE];
+				act->equipement[EQUIPMNT_CHAUSSURE]=NULL;
+				
+			}
+			
+			return 1;
+		}
+		else
+		{
+			act->vie-=DOMMAGE_RESTER_ACIDE;
+			
+			if(act->vie<=0)
+			{
+			
+				 transformer_en_cadavre(act);
+				return 0;
+			}
+			
+			
+			return 1;
+		}
+		
+	}
+	
+	
+	return 2;
+}
+
+//int ajout_degat_verre(joueur *jr);
+//
+//Fonction pour ajouter d'eventuels degat du
+// aux morceaux de verrespar terre si l'acteur ou le joueur
+// ne possède pas de chaussure
+// retourne 0 si la santé atteint 0
+// retourne 1 si il y a dégat du a verre
+// retourne 2 si il le joueur ne prend pas de dégat 
+int ajout_degat_verre(joueur *jr,carte *crte)
+{
+	char message[512];
+	if(crte->donnee_carte[jr->y][jr->x].type==TILE_SOL_VERRE)
+	{
+		
+		if(jr->equipement[EQUIPMNT_CHAUSSURE]==NULL)
+		{
+		
+		
+			jr->vie-=DOMMAGE_MARCHE_VERRE;
+			ajout_adrenaline(jr,DOMMAGE_MARCHE_VERRE,0,false);
+			faire_saigner(jr);
+			sprintf(message,"Des morceaux s'enfoncent dans vos plantes de pieds: %d de degats.",DOMMAGE_MARCHE_VERRE);
+			moteur_jeu::ajouter_mess_console(message,al_map_rgb(0,0,255));
+		
+			if(jr->vie<=0)return 0;
+		
+			return 1;
+		}
+		
+	}
+	
+	return 2;
+	
+	
+	
+}
+int ajout_degat_verre(acteur *act,carte *crte)
+{
+	char message[512];
+	if(crte->donnee_carte[act->y][act->x].type==TILE_SOL_VERRE)
+	{
+		
+		if(act->equipement[EQUIPMNT_CHAUSSURE]==NULL)
+		{
+		
+		
+			act->vie-=DOMMAGE_MARCHE_VERRE;
+		
+		
+			if(act->vie<=0)
+			{
+			
+				 transformer_en_cadavre(act);
+				return 0;
+			}
+		
+			return 1;
+		}
+		
+	}
+	
+	return 2;
+	
+}
+	

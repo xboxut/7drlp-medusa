@@ -21,6 +21,8 @@
 #define DESTRUC_MOYEN		2
 #define DESTRUC_DUR			3
 
+#define DOMMAGE_MARCHE_VERRE	3
+#define DOMMAGE_RESTER_ACIDE	1
 
 //description des tuiles constitutives des cartes
 class tile
@@ -28,7 +30,7 @@ class tile
 public:
 	int type;
 	int bmp_index;
-	
+	int bmp_index2; // pour les portes ouvertes
 	char *name;
 	char *description;
 	
@@ -69,6 +71,12 @@ int placer_tile(tile *tle,int tile_type);
 
 // fonction pour copier un tile
 int copie_tile(tile *dest,tile *source);
+
+
+//fonction pour remplacer un tile
+// Contraitement à la copie, ne modifie pas les propriete 
+// de vision des tile.
+int remplacer_tile(tile *dest,int tile_type);
 
 
 //fonction pour ouvrir ou fermer une porte.

@@ -28,6 +28,7 @@ int creation_tile_prefab()
 	
 	prefab_tile[TILE_INTERIEUR_MUR].type=TILE_INTERIEUR_MUR;
 	prefab_tile[TILE_INTERIEUR_MUR].bmp_index=BMP_INTERIEUR_MUR;
+	prefab_tile[TILE_INTERIEUR_MUR].bmp_index2=BMP_INTERIEUR_MUR;
 	prefab_tile[TILE_INTERIEUR_MUR].name=nom_tile[TILE_INTERIEUR_MUR];
 	prefab_tile[TILE_INTERIEUR_MUR].description=description_tile[TILE_INTERIEUR_MUR];
 	prefab_tile[TILE_INTERIEUR_MUR].destructible_id=DESTRUC_IMPOSSIBLE;	
@@ -51,6 +52,7 @@ int creation_tile_prefab()
 	
 	prefab_tile[TILE_SOL].type=TILE_SOL;
 	prefab_tile[TILE_SOL].bmp_index=BMP_SOL;
+	prefab_tile[TILE_SOL].bmp_index2=BMP_SOL;
 	prefab_tile[TILE_SOL].name=nom_tile[TILE_SOL];
 	prefab_tile[TILE_SOL].description=description_tile[TILE_SOL];
 	prefab_tile[TILE_SOL].destructible_id=DESTRUC_IMPOSSIBLE;	
@@ -73,6 +75,7 @@ int creation_tile_prefab()
 	
 	prefab_tile[TILE_SOL_BRISE].type=TILE_SOL_BRISE;
 	prefab_tile[TILE_SOL_BRISE].bmp_index=BMP_SOL_BRISE;
+	prefab_tile[TILE_SOL_BRISE].bmp_index2=BMP_SOL_BRISE;
 	prefab_tile[TILE_SOL_BRISE].name=nom_tile[TILE_SOL_BRISE];
 	prefab_tile[TILE_SOL_BRISE].description=description_tile[TILE_SOL_BRISE];
 	prefab_tile[TILE_SOL_BRISE].destructible_id=DESTRUC_IMPOSSIBLE;	
@@ -95,6 +98,7 @@ int creation_tile_prefab()
 	
 	prefab_tile[TILE_SOL_VERRE].type=TILE_SOL_VERRE;
 	prefab_tile[TILE_SOL_VERRE].bmp_index=BMP_SOL_VERRE;
+	prefab_tile[TILE_SOL_VERRE].bmp_index2=BMP_SOL_VERRE;
 	prefab_tile[TILE_SOL_VERRE].name=nom_tile[TILE_SOL_VERRE];
 	prefab_tile[TILE_SOL_VERRE].description=description_tile[TILE_SOL_VERRE];
 	prefab_tile[TILE_SOL_VERRE].destructible_id=DESTRUC_IMPOSSIBLE;	
@@ -117,6 +121,7 @@ int creation_tile_prefab()
 	
 	prefab_tile[TILE_SOL_ACIDE].type=TILE_SOL_ACIDE;
 	prefab_tile[TILE_SOL_ACIDE].bmp_index=BMP_SOL_ACIDE;
+	prefab_tile[TILE_SOL_ACIDE].bmp_index2=BMP_SOL_ACIDE;
 	prefab_tile[TILE_SOL_ACIDE].name=nom_tile[TILE_SOL_ACIDE];
 	prefab_tile[TILE_SOL_ACIDE].description=description_tile[TILE_SOL_ACIDE];
 	prefab_tile[TILE_SOL_ACIDE].destructible_id=DESTRUC_IMPOSSIBLE;	
@@ -139,6 +144,7 @@ int creation_tile_prefab()
 	
 	prefab_tile[TILE_MUR].type=TILE_MUR;
 	prefab_tile[TILE_MUR].bmp_index=BMP_MUR;
+	prefab_tile[TILE_MUR].bmp_index2=BMP_MUR;
 	prefab_tile[TILE_MUR].name=nom_tile[TILE_MUR];
 	prefab_tile[TILE_MUR].description=description_tile[TILE_MUR];
 	prefab_tile[TILE_MUR].destructible_id=DESTRUC_IMPOSSIBLE;	
@@ -161,6 +167,7 @@ int creation_tile_prefab()
 	
 	prefab_tile[TILE_MUR_BRISE].type=TILE_MUR_BRISE;
 	prefab_tile[TILE_MUR_BRISE].bmp_index=BMP_MUR_BRISE;
+	prefab_tile[TILE_MUR_BRISE].bmp_index2=BMP_MUR_BRISE;
 	prefab_tile[TILE_MUR_BRISE].name=nom_tile[TILE_MUR_BRISE];
 	prefab_tile[TILE_MUR_BRISE].description=description_tile[TILE_MUR_BRISE];
 	prefab_tile[TILE_MUR_BRISE].destructible_id=DESTRUC_IMPOSSIBLE;	
@@ -183,6 +190,7 @@ int creation_tile_prefab()
 	
 	prefab_tile[TILE_VITRE].type=TILE_VITRE;
 	prefab_tile[TILE_VITRE].bmp_index=BMP_VITRE;
+	prefab_tile[TILE_VITRE].bmp_index2=BMP_VITRE;
 	prefab_tile[TILE_VITRE].name=nom_tile[TILE_VITRE];
 	prefab_tile[TILE_VITRE].description=description_tile[TILE_VITRE];
 	prefab_tile[TILE_VITRE].destructible_id=DESTRUC_FACILE;	
@@ -205,6 +213,7 @@ int creation_tile_prefab()
 	
 	prefab_tile[TILE_PORTE_FRAGILE].type=TILE_PORTE_FRAGILE;
 	prefab_tile[TILE_PORTE_FRAGILE].bmp_index=BMP_PORTE_FRAGILE;
+	prefab_tile[TILE_PORTE_FRAGILE].bmp_index2=BMP_PORTE_FRAGILE_OUVERT;
 	prefab_tile[TILE_PORTE_FRAGILE].name=nom_tile[TILE_PORTE_FRAGILE];
 	prefab_tile[TILE_PORTE_FRAGILE].description=description_tile[TILE_PORTE_FRAGILE];
 	prefab_tile[TILE_PORTE_FRAGILE].destructible_id=DESTRUC_FACILE;	
@@ -227,6 +236,7 @@ int creation_tile_prefab()
 	
 	prefab_tile[TILE_PORTE_NORMALE].type=TILE_PORTE_NORMALE;
 	prefab_tile[TILE_PORTE_NORMALE].bmp_index=BMP_PORTE_NORMALE;
+	prefab_tile[TILE_PORTE_NORMALE].bmp_index2=BMP_PORTE_NORMALE_OUVERT;
 	prefab_tile[TILE_PORTE_NORMALE].name=nom_tile[TILE_PORTE_NORMALE];
 	prefab_tile[TILE_PORTE_NORMALE].description=description_tile[TILE_PORTE_NORMALE];
 	prefab_tile[TILE_PORTE_NORMALE].destructible_id=DESTRUC_MOYEN;	
@@ -249,6 +259,7 @@ int creation_tile_prefab()
 	
 	prefab_tile[TILE_PORTE_BLINDE].type=TILE_PORTE_BLINDE;
 	prefab_tile[TILE_PORTE_BLINDE].bmp_index=BMP_PORTE_BLINDE;
+	prefab_tile[TILE_PORTE_BLINDE].bmp_index2=BMP_PORTE_BLINDE_OUVERT;
 	prefab_tile[TILE_PORTE_BLINDE].name=nom_tile[TILE_PORTE_BLINDE];
 	prefab_tile[TILE_PORTE_BLINDE].description=description_tile[TILE_PORTE_BLINDE];
 	prefab_tile[TILE_PORTE_BLINDE].destructible_id=DESTRUC_DUR;	
@@ -271,6 +282,7 @@ int creation_tile_prefab()
 	
 	prefab_tile[TILE_BARREAUX].type=TILE_BARREAUX;
 	prefab_tile[TILE_BARREAUX].bmp_index=BMP_BARREAUX;
+	prefab_tile[TILE_BARREAUX].bmp_index2=BMP_BARREAUX;
 	prefab_tile[TILE_BARREAUX].name=nom_tile[TILE_BARREAUX];
 	prefab_tile[TILE_BARREAUX].description=description_tile[TILE_BARREAUX];
 	prefab_tile[TILE_BARREAUX].destructible_id=DESTRUC_IMPOSSIBLE;	
@@ -293,6 +305,7 @@ int creation_tile_prefab()
 	
 	prefab_tile[TILE_ESCALIER_BAS].type=TILE_ESCALIER_BAS;
 	prefab_tile[TILE_ESCALIER_BAS].bmp_index=BMP_ESCALIER_BAS;
+	prefab_tile[TILE_ESCALIER_BAS].bmp_index2=BMP_ESCALIER_BAS;
 	prefab_tile[TILE_ESCALIER_BAS].name=nom_tile[TILE_ESCALIER_BAS];
 	prefab_tile[TILE_ESCALIER_BAS].description=description_tile[TILE_ESCALIER_BAS];
 	prefab_tile[TILE_ESCALIER_BAS].destructible_id=DESTRUC_IMPOSSIBLE;	
@@ -316,6 +329,7 @@ int creation_tile_prefab()
 	
 	prefab_tile[TILE_ESCALIER_HAUT].type=TILE_ESCALIER_HAUT;
 	prefab_tile[TILE_ESCALIER_HAUT].bmp_index=BMP_ESCALIER_HAUT;
+	prefab_tile[TILE_ESCALIER_HAUT].bmp_index2=BMP_ESCALIER_HAUT;
 	prefab_tile[TILE_ESCALIER_HAUT].name=nom_tile[TILE_ESCALIER_HAUT];
 	prefab_tile[TILE_ESCALIER_HAUT].description=description_tile[TILE_ESCALIER_HAUT];
 	prefab_tile[TILE_ESCALIER_HAUT].destructible_id=DESTRUC_IMPOSSIBLE;	
@@ -355,6 +369,7 @@ int placer_tile(tile *tle,int tile_type)
 	
 	tle->type=	prefab_tile[tile_type].type;
 	tle->bmp_index=	prefab_tile[tile_type].bmp_index;
+	tle->bmp_index2=prefab_tile[tile_type].bmp_index2;
 	tle->name=prefab_tile[tile_type].name;
 	tle->description=prefab_tile[tile_type].description;
 	tle->destructible_id=prefab_tile[tile_type].destructible_id;	
@@ -378,6 +393,7 @@ int copie_tile(tile *dest,tile *source)
 	
 	dest->type=	source->type;
 	dest->bmp_index=	source->bmp_index;
+	dest->bmp_index2=source->bmp_index2;
 	dest->name=source->name;
 	dest->description=source->description;
 	dest->destructible_id=source->destructible_id;	
@@ -391,6 +407,25 @@ int copie_tile(tile *dest,tile *source)
 
 	
 	return 0;
+}
+
+//fonction pour remplacer un tile
+// Contraitement à la copie, ne modifie pas les propriete 
+// de vision des tile.
+int remplacer_tile(tile *tle,int tile_type)
+{
+	
+	tle->type=	prefab_tile[tile_type].type;
+	tle->bmp_index=	prefab_tile[tile_type].bmp_index;
+	tle->bmp_index2=	prefab_tile[tile_type].bmp_index2;
+	tle->name=prefab_tile[tile_type].name;
+	tle->description=prefab_tile[tile_type].description;
+	tle->destructible_id=prefab_tile[tile_type].destructible_id;	
+	tle->transparent=prefab_tile[tile_type].transparent;
+	tle->bloquant=prefab_tile[tile_type].bloquant;
+	tle->ferme=prefab_tile[tile_type].ferme;
+	tle->verrouille=prefab_tile[tile_type].verrouille;
+	
 }
 
 

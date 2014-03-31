@@ -171,7 +171,7 @@ int emission_action_cac(action *ac,int taille_tab,joueur *jr,acteur *act,acteur 
 
 int emission_action_clancer(action *ac,int taille_tab,joueur *jr,acteur *act,int x,int y,bool emplacement_strict);
 
-int emission_action_cafeur(action *ac,int taille_tab,joueur *jr,acteur *act,int x,int y,bool emplacement_strict,bool direction);
+int emission_action_cafeur(action *ac,int taille_tab,joueur *jr,acteur *act,acteur *cible,int x,int y,bool emplacement_strict,bool direction);
 
 int emission_action_cafeurl(action *ac,int taille_tab,joueur *jr,acteur *act,int x,int y,bool emplacement_strict,bool direction);
 

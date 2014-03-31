@@ -41,6 +41,9 @@
 #define MAX_ACTEUR							32
 
 
+#define RAYON_EXPLOSION						3
+#define DEGAT_EXPLOSION						100
+
 /*
 //Constantes pour la définition des comportement
 #define CMPRTMNT_RIEN						0
@@ -57,7 +60,8 @@ class acteur
 public:	
 	int acteur_type;
 	
-	
+	char *acteur_nom;
+	char *description;
 	
 	int bmp_index;
 	int bmp_index_detruit;
@@ -76,7 +80,7 @@ public:
 	int coup_critique;//sur 1000
 	
 	bool hemorragie;
-	int hemorragie_tic;
+	int tic_hemorragie;
 	//type de comportement
 	int comportement_type;
 	bool fuite;//savoir si le personnage doit fuir ou non
@@ -89,6 +93,7 @@ public:
 	
 	objet *equipement[MAX_EQUIPMNT];
 	
+	int ajout_score;
 	
 	acteur();
 	~acteur();
@@ -135,6 +140,11 @@ int calcul_protec(acteur *act);
 //retourne le nombre d'equipement detruit
 int degradation_equip_protec(acteur *act);
 
+// Fonction qui calcule la dégradation de l arme equipee
+//
+// Si le joueur frappe avec son arme ou l'utilise, 
+// on enleve 1 a l etat général de cette derniere.
+int degradation_equip_arme(acteur *act);
 
 //int calcul_bonus_vit_deplacement(joeur *jr);
 // Retourne le bonus de vitesse de déplacement du à l'equipement 
@@ -152,7 +162,36 @@ int calcul_bonus_equip_vitdeplace(acteur *act);
 int degradation_equip_protec(acteur *act);
 
 
-int transformer_en_cadavre(acteur *act);//A faire
+
+/***********************************************************************
+********************FONCTIONS DE GESTION DES DIFFERENTES JAUGES *******/
+
+//int transformer_en_cadavre(acteur *act);
+//
+//Fonction pour transformer un acteur mort en cadavre.
+int transformer_en_cadavre(acteur *act);
+
+//int faire_saigner(acteur *act);
+//
+// Fonction pour initier une hémorragie chez l'acteur.
+// met le booleen hemorragie sur vraie et retourne 1 
+// (10% de chance).
+// Sinon retourne 0
+int faire_saigner(acteur *act);
+
+
+//int maj_hemorragie
+//fonction de mise a jour de l etat de sante du joueur 
+// en relation ac l hemorragie
+// retourne 0 si la sante atteint 0 
+// retourne 1 si il y a hemoragie
+// retourne 2 si il n y a pas hemoragie
+int maj_hemorragie(acteur  *act);
+
+/*********************************************************************
+*********************************************************************/
+
+
 
 
 // Fonction pour savoir si un sotckage est
@@ -181,3 +220,19 @@ acteur * placer_mobilier(int x, int  y,int acteur_type);
 acteur * placer_personnage(int x,int y,int acteur_type);
 
 
+
+/********************************************************************
+************ GESTION DU COMPORTEMENT DES ACTEURS ********************
+********************************************************************/
+
+//fonction pour savoir si le champ de vision entre le joueur et l'acteur
+// Choisi est libre ou non!
+// c'est l'algo de champ de vision du joueur simplifié (plus rapide)
+int acteur_voit_joueur(carte *crte, acteur *act, joueur *jr);
+
+// int acteur_doit_fuir(carte *crte, acteur *act, joueur *jr);
+// Fonction pour savoir si l'acteur doit fuir ou non!
+// dépend du type de comportement ainsi que du nombre de points
+// de vie de l'acteur et de l'armement du joueur
+
+int acteur_doit_fuir(carte *crte, acteur *act, joueur *jr);

@@ -91,7 +91,7 @@ static int deplacer_camera(int x,int y);
 static int centrer_camera_joueur();
 /***********************************************************/
 
-static int affiche_interface(); // A FAIRE
+static int affiche_interface();
 
 
 // int affiche_inventaire();
@@ -158,7 +158,9 @@ static int vider_console();
         // int ajout_tic();
         //
         // Fonction pour ajouter un tic et incrémenter les points d'action de chacune des
-		// actions actives. 
+		// actions actives.
+		// Retourne 0 si le joueur ne meurt pas.
+		// retourne 2 si le joueur meurt. 
 		static int ajout_tic();
 		
 		//int recherche_actions_finies();
@@ -210,6 +212,15 @@ static int vider_console();
 // ********************FONCTION UTILE POUR LA GESTION DES COMBATS *****
 // ************************************************************
 
+// Fonction pour gerer l'interaction entre les tiles et
+// les balles lors des calculs des trajectoire e tir.
+// retourne 0 si la balle n'est pas arrete
+// Sinon retourne 1
+
+ static int interaction_balle_tile(acteur *act, joueur *jr, int x, int y);
+ 
+ 
+ 
 // proba_toucher_obstacle
 // Fonction pour calculer la probabilité de toucher un obstacle
 // entre le tireur et la cible.
@@ -218,14 +229,34 @@ static int vider_console();
 // pctage -> pourcentage de chance de toucher un obstacle au niveau du joueur /100
 // pctage_proche -> pourcentage de chance de touche un obstacle lorsque la distance tireur cible est tres reduite
 // int distance_reduit -> longueur maximum a dela de laquelle la distance tireur cible n'est plus réduite.
-static bool proba_toucher_obstacle(int x1,int y1,int x2,int y2,int x,int y,int prctage,int pctage_proche,int dist_reduit);		
+static bool proba_toucher_obstacle(int x1,int y1,int x2,int y2,int x,int y,int prctage,int pctage_proche,int dist_reduit);				
+
+
+//static bool proba_toucher_obstacle_direction(int xtireur,ytireur, int x, int y, joueur *jr);
+//
+// Fonction pour calculer la probabilite de toucher un obstacle lorsque
+// l'on décide de tirer dans une direction donnee. 
+static bool proba_toucher_obstacle_tdirection( int x, int y, joueur *jr);
+static bool proba_toucher_obstacle_tdirection( int x, int y, acteur *act);
+
+
+//fonction pour savoir si un pnj sur le chemin de la balle, la prend 
+// dans la mouille. 
+static bool proba_toucher_pnj_non_cible(int x, int y, joueur *jr );
+//
+// Version pour les pnj 
+static bool proba_toucher_pnj_non_cible(int x, int y, acteur *act );
 		
-// Fonction pour calculer des dégats en fonction de la position d'un obstacle
+	
+// Fonction pour calculer et apliquer des dégats en fonction de la position d'un obstacle
 // Différent de degat cible car on considere deja que l'obstacle a été touché
 // grace a la fonction proba toucher obstacle
-static int calcul_degat_obstacle();
+static int calcappliq_degat_obstacle(joueur *jr,acteur *act,acteur *cible,int nbballe);
 
-static bool calcul_cible_atteinte();
+// Fonction pour savoir si la cible visée est atteinte ou pas. Différents des fonctions de traitement
+// des obstacles.
+static bool calcul_cible_atteinte(joueur *jr, acteur *act,acteur *cible);
+
 //--------GESTION DU JOUEUR
 	
 	//int placer_joueur(int x,int y);
@@ -270,6 +301,9 @@ static bool calcul_cible_atteinte();
 	//Fonction pour gerer le ramassage dans des conteneurs tels que les bureaux etagere etc
 	static int gestion_loot(ALLEGRO_EVENT_QUEUE *queue);
 	
+	//fonction pour gerer l ouverture des portes
+	static int gestion_ouverturefermeture(ALLEGRO_EVENT_QUEUE *queue);
+
 	//static int calcul_champ_vision();
 	//
 	// Fonction de calcul du champ de vision du joueur

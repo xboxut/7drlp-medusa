@@ -350,7 +350,7 @@ int creer_prefab_objets()
 	prefab_objet[OBJ_PISTOLET].ajt_perm_dxtrt=0;
 	prefab_objet[OBJ_PISTOLET].ajt_perm_vitesse=0;
 	prefab_objet[OBJ_PISTOLET].max_munition=15;	   //nombre max de munitions	
-	prefab_objet[OBJ_PISTOLET].munition=0;
+	prefab_objet[OBJ_PISTOLET].munition=15;
 	prefab_objet[OBJ_PISTOLET].modif_vit_dplcment=0;
 	///////////////////////////////////////////////////////
 
@@ -379,7 +379,7 @@ int creer_prefab_objets()
 	prefab_objet[OBJ_FUSIL_POMPE].ajt_perm_dxtrt=0;
 	prefab_objet[OBJ_FUSIL_POMPE].ajt_perm_vitesse=0;
 	prefab_objet[OBJ_FUSIL_POMPE].max_munition=4;	   //nombre max de munitions	
-	prefab_objet[OBJ_FUSIL_POMPE].munition=0;
+	prefab_objet[OBJ_FUSIL_POMPE].munition=4;
 	prefab_objet[OBJ_FUSIL_POMPE].modif_vit_dplcment=0;
 	///////////////////////////////////////////////////////
 	
@@ -408,7 +408,7 @@ int creer_prefab_objets()
 	prefab_objet[OBJ_MITRAILLETTE].ajt_perm_dxtrt=0;
 	prefab_objet[OBJ_MITRAILLETTE].ajt_perm_vitesse=0;
 	prefab_objet[OBJ_MITRAILLETTE].max_munition=32;	   //nombre max de munitions	
-	prefab_objet[OBJ_MITRAILLETTE].munition=0;
+	prefab_objet[OBJ_MITRAILLETTE].munition=32;
 	prefab_objet[OBJ_MITRAILLETTE].modif_vit_dplcment=0;
 	///////////////////////////////////////////////////////
 
@@ -848,7 +848,35 @@ int creer_prefab_objets()
 	prefab_objet[OBJ_ANTIDOTE_FINAL].munition=0;
 	prefab_objet[OBJ_ANTIDOTE_FINAL].modif_vit_dplcment=0;
 	///////////////////////////////////////////////////////
-									
+	
+	///////////////////////////////////////////////////////
+	///OBJ_CLE
+	nom_objet[OBJ_CLE]=new char[strlen("Antidote")+1];
+	strcpy(nom_objet[OBJ_CLE],"Antidote");
+	
+	description_objet[OBJ_CLE]=new char[strlen("Cette seringue contient l'antidote au poison medusa.")+1];
+	strcpy(description_objet[OBJ_CLE],"Cette seringue contient l'antidote au poison medusa.");
+	
+	prefab_objet[OBJ_CLE].objet_type=OBJ_CLE;
+	prefab_objet[OBJ_CLE].objet_nom=nom_objet[OBJ_CLE];
+	prefab_objet[OBJ_CLE].description=description_objet[OBJ_CLE];
+	prefab_objet[OBJ_CLE].x=-1;
+	prefab_objet[OBJ_CLE].y=-1;
+	prefab_objet[OBJ_CLE].bmp_index=BMP_CLE;
+	prefab_objet[OBJ_CLE].degat=0;			
+	prefab_objet[OBJ_CLE].protection=0;	
+	prefab_objet[OBJ_CLE].ajt_vie=0;          
+	prefab_objet[OBJ_CLE].ajt_adrenaline=0;	  	
+	prefab_objet[OBJ_CLE].ajt_furie=0;		
+	prefab_objet[OBJ_CLE].stop_sang=false;	  
+	prefab_objet[OBJ_CLE].etat_obj=0;	    	
+	prefab_objet[OBJ_CLE].ajt_perm_frce=0;	
+	prefab_objet[OBJ_CLE].ajt_perm_dxtrt=0;	
+	prefab_objet[OBJ_CLE].ajt_perm_vitesse=0; 
+	prefab_objet[OBJ_CLE].max_munition=0;	  	
+	prefab_objet[OBJ_CLE].munition=0;
+	prefab_objet[OBJ_CLE].modif_vit_dplcment=0;
+	//////////////////////////////////////////////////////								
 	return 0;
 }
 

@@ -18,7 +18,7 @@
 * - PROCESS DES ACTIONS
 * - MENU ETC
 ***************************************************************/
-
+#include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <allegro5/allegro.h>
@@ -55,7 +55,7 @@ int moteur_jeu::ecranY=768;
 
 bool moteur_jeu::plein_ecran=false;
 	
-int moteur_jeu::vue_jeuX=32*28;
+int moteur_jeu::vue_jeuX=32*27;
 int moteur_jeu::vue_jeuY=32*21; //moteur_jeu::ecranY*4/5;
 
  int  moteur_jeu::cameraX=0; 
@@ -134,11 +134,43 @@ int moteur_jeu::affiche_tuiles()
 			
 				if(monde[carte_active]->donnee_carte[i][j].champ_vision)
 				{
+					if(monde[carte_active]->donnee_carte[i][j].type==TILE_PORTE_FRAGILE ||
+					   monde[carte_active]->donnee_carte[i][j].type==TILE_PORTE_NORMALE ||
+					   monde[carte_active]->donnee_carte[i][j].type==TILE_PORTE_BLINDE)
+					{
+							if(monde[carte_active]->donnee_carte[i][j].ferme)
+							{
+								al_draw_bitmap_region(bitmap_index[monde[carte_active]->donnee_carte[i][j].bmp_index],
+   								0.0, 0.0, float(tile_res), float(tile_res), float((j-cameraX)*tile_res), float((i-cameraY)*tile_res), 0);	
+							}
+							else
+								al_draw_bitmap_region(bitmap_index[monde[carte_active]->donnee_carte[i][j].bmp_index2],
+			   					0.0, 0.0, float(tile_res), float(tile_res), float((j-cameraX)*tile_res), float((i-cameraY)*tile_res), 0);	
+							
+					}
+					else
 					al_draw_bitmap_region(bitmap_index[monde[carte_active]->donnee_carte[i][j].bmp_index],
    					0.0, 0.0, float(tile_res), float(tile_res), float((j-cameraX)*tile_res), float((i-cameraY)*tile_res), 0);					
 				}
 				else
-				{
+				{	
+				
+					if(monde[carte_active]->donnee_carte[i][j].type==TILE_PORTE_FRAGILE ||
+					   monde[carte_active]->donnee_carte[i][j].type==TILE_PORTE_NORMALE ||
+					   monde[carte_active]->donnee_carte[i][j].type==TILE_PORTE_BLINDE)
+					{
+							if(monde[carte_active]->donnee_carte[i][j].ferme)
+							{
+									al_draw_bitmap_region(bitmap_index[monde[carte_active]->donnee_carte[i][j].bmp_index],
+	   								float(tile_res), 0.0, float(tile_res), float(tile_res), float((j-cameraX)*tile_res), float((i-cameraY)*tile_res), 0);
+
+							}
+							else
+								al_draw_bitmap_region(bitmap_index[monde[carte_active]->donnee_carte[i][j].bmp_index2],
+	   							float(tile_res), 0.0, float(tile_res), float(tile_res), float((j-cameraX)*tile_res), float((i-cameraY)*tile_res), 0);
+
+					}
+					else
 					al_draw_bitmap_region(bitmap_index[monde[carte_active]->donnee_carte[i][j].bmp_index],
 	   				float(tile_res), 0.0, float(tile_res), float(tile_res), float((j-cameraX)*tile_res), float((i-cameraY)*tile_res), 0);
 				}
@@ -233,7 +265,7 @@ int moteur_jeu::affiche_acteurs()
 								{
 		
 
-								 if(monde[carte_active]->acteur_tab[i]->acteur_type<ACTEUR_SCIENTIFIQUE_BASE);
+								 if(monde[carte_active]->acteur_tab[i]->acteur_type<ACTEUR_SCIENTIFIQUE_BASE)
 								 al_draw_bitmap_region(bitmap_index[monde[carte_active]->acteur_tab[i]->bmp_index],
    										float(tile_res), 0.0, float(tile_res), float(tile_res),  float((monde[carte_active]->acteur_tab[i]->x-cameraX)*tile_res),float((monde[carte_active]->acteur_tab[i]->y-cameraY)*tile_res), 0);													
 											
@@ -276,6 +308,64 @@ int moteur_jeu::affiche_joueur()
 
 int moteur_jeu::affiche_interface()
 {
+		
+		al_draw_bitmap(bitmap_index[BMP_INTERFACE_FOND],float(vue_jeuX), 0.0,  0);													
+									
+	
+		//al_draw_filled_rectangle(float(vue_jeuX)+0.5,float(0.5),float(ecranX)-0.5,float(vue_jeuY)-0.5,al_map_rgb(0,0,0));
+	
+	  	al_draw_text(font,al_map_rgb(0,0,0), float(vue_jeuX+5),float(5), 0,ply1.nom);
+	   			
+	// JAUGE DE VIE 
+	   // Taille de 20 de large
+	   // taille de 150 de haut
+	   // debut de la jauge 20
+		al_draw_rectangle(float(vue_jeuX+(ecranX-vue_jeuX)/5),float(100),float(vue_jeuX+(ecranX-vue_jeuX)/5+20)+0.5,float(100+150),al_map_rgb(255,0,0),2.0);
+		al_draw_filled_rectangle(float(vue_jeuX+(ecranX-vue_jeuX)/5+2),float(100+150-150*ply1.vie/ply1.vie_max+2),float(vue_jeuX+(ecranX-vue_jeuX)/5+20-2)+0.5,float(100+150-2),al_map_rgb(242,40,40));
+		
+		al_draw_textf(font,al_map_rgb(255,50,0), float(vue_jeuX+(ecranX-vue_jeuX)/5+10),float(100+150+20), ALLEGRO_ALIGN_CENTRE,"%d/%d",ply1.vie,ply1.vie_max);
+	   		   		
+   		
+	//al_draw_filled_rectangle(0.0,float(682),float(vue_jeuX+8)+0.5,float(ecranY),al_map_rgb(0,0,0));
+   
+	
+	// JAUGE D' ADRENALINE
+		al_draw_rectangle(float(vue_jeuX+3*(ecranX-vue_jeuX)/5),float(100),float(vue_jeuX+3*(ecranX-vue_jeuX)/5+20)+0.5,float(100+150),al_map_rgb(5,29,192),2.0);
+     	al_draw_filled_rectangle(float(vue_jeuX+3*(ecranX-vue_jeuX)/5+2),float(100+150-150*ply1.adrenaline/ply1.adrenaline_max+2),float(vue_jeuX+3*(ecranX-vue_jeuX)/5+20-2)+0.5,float(100+150-2),al_map_rgb(61,84,250));
+
+	    al_draw_textf(font,al_map_rgb(0,50,250), float(vue_jeuX+3*(ecranX-vue_jeuX)/5+10),float(100+150+20), ALLEGRO_ALIGN_CENTRE,"%d/%d",ply1.adrenaline,ply1.adrenaline_max);
+	
+	// AFFICHAGE DES CARACTERISTIQUES DU JOUEUR
+	
+	    al_draw_textf(font,al_map_rgb(0,0,0), float(vue_jeuX+5),float(100+150+20+50), 0,"Caracteristiques");
+	
+		al_draw_textf(font,al_map_rgb(0,0,0), float(vue_jeuX+15),float(100+150+20+70), 0,"Force: %d", ply1.force);
+		al_draw_textf(font,al_map_rgb(0,0,0), float(vue_jeuX+15),float(100+150+20+80), 0,"Dexteri: %d", ply1.dexterite);
+		al_draw_textf(font,al_map_rgb(0,0,0), float(vue_jeuX+15),float(100+150+20+90), 0,"Vitesse: %d", ply1.vitesse);
+		//al_draw_textf(font,al_map_rgb(0,50,250), float(vue_jeuX+40),float(100+150+20+70), 0,"Dxtrt: %d", ply1.dexterite);
+		
+	// GESTION DE LA FURIE
+	 if( ply1.enfurie)
+	 {
+	 	
+	 		al_draw_bitmap(bitmap_index[BMP_INTERFACE_BFURIE],float(vue_jeuX+30), float(100+150+20+115),  0);													
+	
+	 }
+	
+	// Affichage du saignement
+	 if( ply1.hemorragie)
+	 {
+	 	
+	 		al_draw_bitmap(bitmap_index[BMP_INTERFACE_BHEMORRAGIE],float(vue_jeuX+30), float(100+150+20+155),  0);													
+	
+	 }
+	
+	 if( monde[carte_active]->cle_acquise)
+	 {
+	 	
+	 		al_draw_bitmap(bitmap_index[BMP_INTERFACE_BCLE],float(vue_jeuX+30), float(100+150+20+255),  0);													
+	
+	 }
 	
 	
 	return 0;
@@ -321,7 +411,7 @@ int moteur_jeu::affiche_interface()
 	   													
 				}
 				else//affichage du reste
-				al_draw_text(font,al_map_rgb(0,0,0), float(400+tile_res+tile_res/2),float(y+i*tile_res+(tile_res-8)/2), 0,ply1.equipement[i]->objet_nom);
+				al_draw_textf(font,al_map_rgb(0,0,0), float(400+tile_res+tile_res/2),float(y+i*tile_res+(tile_res-8)/2), 0,"%s (etat: %d)",ply1.equipement[i]->objet_nom,ply1.equipement[i]->etat_obj);
 	   				
  	   }
  	}
@@ -344,7 +434,7 @@ int moteur_jeu::affiche_interface()
 			   		
 				   }
 				   else	
-				  	al_draw_text(font,al_map_rgb(0,0,0), float(400+tile_res*2+tile_res/2),float((MAX_EQUIPMNT+2)*tile_res+y+i*tile_res+(tile_res-8)/2), 0,ply1.sac_contenu[i]->objet_nom);
+				  	al_draw_textf(font,al_map_rgb(0,0,0), float(400+tile_res*2+tile_res/2),float((MAX_EQUIPMNT+2)*tile_res+y+i*tile_res+(tile_res-8)/2), 0,"%s (etat: %d)",ply1.sac_contenu[i]->objet_nom,ply1.sac_contenu[i]->etat_obj);
 			   													
 					
 		 	   }
@@ -619,7 +709,22 @@ int moteur_jeu::chargement_bitmap()
 	bitmap_index[BMP_FLECHE_MENU]=al_load_bitmap(".\\bitmap\\BMP_FLECHE_MENU.bmp");
 	bitmap_index[BMP_PRENDRE_MENU]=al_load_bitmap(".\\bitmap\\BMP_PRENDRE_MENU.bmp");
 	
+	// bitmap des objets brises
+	bitmap_index[BMP_CONTENEUR_ACIDE_BRISE]=al_load_bitmap(".\\bitmap\\BMP_CONTENEUR_ACIDE_BRISE.bmp");
+	bitmap_index[BMP_BOUTEILLE_GAZ_BRISE]=al_load_bitmap(".\\bitmap\\BMP_BOUTEILLE_GAZ_BRISE.bmp");
+
+
+	// bitmap pour l'interface
+	bitmap_index[BMP_INTERFACE_FOND]=al_load_bitmap(".\\bitmap\\BMP_INTERFACE_FOND.bmp");
+	bitmap_index[BMP_INTERFACE_BFURIE]=al_load_bitmap(".\\bitmap\\BMP_INTERFACE_BFURIE.bmp");
+	bitmap_index[BMP_INTERFACE_BHEMORRAGIE]=al_load_bitmap(".\\bitmap\\BMP_INTERFACE_BHEMORRAGIE.bmp");
+	bitmap_index[BMP_INTERFACE_BCLE]=al_load_bitmap(".\\bitmap\\BMP_INTERFACE_BCLE.bmp");
 	
+	//bitmap pour porte ouverte
+	bitmap_index[BMP_PORTE_FRAGILE_OUVERT]=al_load_bitmap(".\\bitmap\\BMP_PORTE_FRAGILE_OUVERT.bmp");
+	bitmap_index[BMP_PORTE_NORMALE_OUVERT]=al_load_bitmap(".\\bitmap\\BMP_PORTE_NORMALE_OUVERT.bmp");
+	bitmap_index[BMP_PORTE_BLINDE_OUVERT]=al_load_bitmap(".\\bitmap\\BMP_PORTE_BLINDE_OUVERT.bmp");
+
 //	 al_convert_mask_to_alpha(bitmap_index[BMP_FLECHE_MENU], al_map_rgb(255,0,255));
 	
 	//test de chargement
@@ -654,7 +759,7 @@ int moteur_jeu::ajouter_mess_console(const char *message, ALLEGRO_COLOR COL)
 	
 	gestionnaire_message::ajout_message( message,COL);
 	
-	al_draw_filled_rectangle(0.0,float(682),float(vue_jeuX)+0.5,float(ecranY),al_map_rgb(0,0,0));
+	al_draw_filled_rectangle(0.0,float(682),float(vue_jeuX+8)+0.5,float(ecranY),al_map_rgb(0,0,0));
    
 	 affiche_boite_message();
 }	
@@ -673,7 +778,7 @@ static int vider_console();
 //-------Gestion des actions
 int moteur_jeu::jeu()
 {
-	
+	int res=0;
 	while(sortie_boucle_jeu==false)
 	{
 		if(entree_nouv_carte)
@@ -688,21 +793,38 @@ int moteur_jeu::jeu()
 			remplacement_action_finies();	
 		}
 		
+		///////////////////////////
 		printf("ajout tics");
-		ajout_tic();
+		res=ajout_tic();
+		if(res==2)
+		{
+		 	mort_joueur=true;
+			sortie_boucle_jeu=true;	
+		}
+		///////////////////////////
+		
+		///////////////////////////
 		printf("recherche actions finies\n");
 		recherche_actions_finies();
+		///////////////////////////
+		
 		
 		printf("tri actions finies\n");
-		
 		calcul_pa_et_tri_action_finies();
 		
 		printf("execution actions finies\n");
-		if(execution_action_finies()==1)
+		res=execution_action_finies();
+		if(res==1) //-> SI Execution action finies retourne 1 cela correspond a un changement de carte.
 		{
 			//GESTION DU CHANGEMENT DE CARTE
 			vider_actions();
 			nombre_action_finies=0;
+			
+		}
+		if(res==2)
+		{
+			mort_joueur=true;
+			sortie_boucle_jeu=true;
 			
 		}
 		
@@ -726,6 +848,9 @@ int moteur_jeu::vider_actions()
         //
         // Fonction pour ajouter un tic et incrémenter les points d'action de chacune des
 		// actions actives. 
+		// Retourne 0 si le joueur ne meurt pas.
+		// retourne 1 si le joueur meurt.
+		
 int moteur_jeu::ajout_tic()
 {
 	// ************************
@@ -734,9 +859,33 @@ int moteur_jeu::ajout_tic()
 	
 	maj_furie(&ply1);
 
-	maj_adrenaline(&ply1);
+	if(maj_adrenaline(&ply1)==0)return 2;
 
-    maj_hemorragie(&ply1);
+    if(maj_hemorragie(&ply1)==0)return 2;
+    
+    if(maj_degat_acide(&ply1,monde[carte_active])==0)return 2;
+ 
+//A FAIRE Gestion de la mort
+
+	// ************************
+	// ************* MISE A JOUR DES JAUGES DES ACTEURS
+	// ************************
+	
+	for(register int i=0;i<NB_MAX_ACTEUR;i++)
+	{
+		
+		if(monde[carte_active]->acteur_tab[i]!=NULL &&
+		   monde[carte_active]->acteur_tab[i]->acteur_type>=ACTEUR_SCIENTIFIQUE_BASE &&
+		   est_vivant(monde[carte_active]->acteur_tab[i]))
+		   {
+		   	maj_degat_acide(monde[carte_active]->acteur_tab[i],monde[carte_active]);
+		   	maj_hemorragie(monde[carte_active]->acteur_tab[i]);
+		   }
+		
+		
+		
+	}
+	
 
   // **************************
   // **************** 
@@ -878,7 +1027,7 @@ int moteur_jeu::calcul_pa_et_tri_action_finies()
 		
 int moteur_jeu::execution_action_finies()
 {
-	
+int res=0;	
 	for(int i=0;i<nombre_action_finies;i++)
 	{
 		// EXECUTION DES ACTIONS TRIES PAR POINT D ACTION MAX
@@ -890,8 +1039,9 @@ int moteur_jeu::execution_action_finies()
 				break;
 				//	
 				case ACTION_MARCHE:
-				if(execute_action_deplacement(&action_tab[actions_finies[i]])==1)
-				return 1;
+				res=execute_action_deplacement(&action_tab[actions_finies[i]]); // SI L'action deplacement retourne 1-> Changement de carte// On arrete tout les actions en cours
+				if(res==1)return 1;
+				if(res==2)return 2;
 				break;
 				//
 				case ACTION_PRISE_OBJET:
@@ -899,7 +1049,8 @@ int moteur_jeu::execution_action_finies()
 				break;
 				//
 				case ACTION_COMBAT_CAC:
-				execute_action_cac(&action_tab[actions_finies[i]]);
+				res=execute_action_cac(&action_tab[actions_finies[i]]);
+				if(res==2)return 2;
 				break;
 				//	
 				case ACTION_COMBAT_LANCE:
@@ -907,11 +1058,12 @@ int moteur_jeu::execution_action_finies()
 				break;
 				//	
 				case ACTION_COMBAT_AFEU_VISEE:
-				execute_action_cafeul(&action_tab[actions_finies[i]]);
+				res=execute_action_cafeul(&action_tab[actions_finies[i]]);
+				if(res==2)return 2;
 				break;
 				//	
 				case ACTION_COMBAT_AFEU_RAPID:
-				execute_action_cafeur(&action_tab[actions_finies[i]]);
+				res=execute_action_cafeur(&action_tab[actions_finies[i]]);
 				break;
 				//	
 				case ACTION_RECHARGEMENT:	
@@ -1035,6 +1187,10 @@ int moteur_jeu::execute_action_deplacement(action *act)
 			{
 			carte_active++;
 			entree_nouv_carte=true;
+			if(monde[carte_active]==NULL)
+			{
+					ajout_score_changement_niveau(act->initj,carte_active);
+			}
 			//Gestion creation nouvelle carte
 			// A FAIRE
 			return 1;
@@ -1054,7 +1210,7 @@ int moteur_jeu::execute_action_deplacement(action *act)
 		{
 			act->initj->x+=act->x;
 			act->initj->y+=act->y;
-			
+			ajout_score_deplacement(act->initj);
 		//GESTION DE LA CAMERA	
 			//deplacement de la camera pour suivre le joueur
 			if(act->initj->x-1<cameraX)cameraX=act->initj->x-2;
@@ -1067,6 +1223,13 @@ int moteur_jeu::execute_action_deplacement(action *act)
 			if(cameraY<=0)cameraY=0;
 			
 			/////////////////////////////////	
+			if(ajout_degat_verre(act->initj,monde[carte_active])==0) // degat du au verre sous les pieds
+			{
+				
+				return 2;
+			/*************** GESTION DE  LA MORT DU PERSO PRINCIPAL***********
+			******************************************************************/
+			}
 			
 			vider_champ_vision_carte(monde[carte_active]);
 			calcul_champ_vision();
@@ -1112,6 +1275,7 @@ int moteur_jeu::execute_action_cac(action *act)
 	int protection;
 	bool mort=false;
 	int vdeplacement;
+	acteur *mobilier;
 	// ATTAQUE DU JOUEUR
 	if(act->initj!=NULL && act->initj->vie>0)
 	{
@@ -1188,6 +1352,8 @@ int moteur_jeu::execute_action_cac(action *act)
 									// diminution de la vie du PNJ
 									act->ciblec->vie-=degat*4/3;
 									
+									degradation_equip_arme(act->initj);
+									
 									// CALCUL DE L AJOUT D ADRENALINE
 									if(act->ciblec->vie<=0) mort=true;
 									 ajout_adrenaline(act->initj,0,degat*4/3,mort);
@@ -1207,6 +1373,8 @@ int moteur_jeu::execute_action_cac(action *act)
 									//degradation des equipements de protection/
 									degradation_equip_protec(act->ciblec);
 									
+									degradation_equip_arme(act->initj);// Degradation de l'arme du donneur de coup
+									
 									// CALCUL DE L AJOUT D ADRENALINE
 									if(act->ciblec->vie<=0) mort=true;
 									 ajout_adrenaline(act->initj,0,(degat*(100-protection))/100,mort);
@@ -1218,9 +1386,13 @@ int moteur_jeu::execute_action_cac(action *act)
 									//Message ratage critique, vous vous blessez en tentant de donner le coup
 									degat=genrand_int32()%(degat/2+1);
 									act->initj->vie-=degat;
+									faire_saigner(act->initj);
+									degradation_equip_arme(act->initj);//degradation de l'arme
 									
 									// AJOUT DE L ADRENALINE
 									 ajout_adrenaline(act->initj,degat,0,mort);
+									if(act->initj->vie<=0)return 2;
+									
 									break;
 								}
 								
@@ -1315,11 +1487,12 @@ int moteur_jeu::execute_action_cac(action *act)
 												case OBJ_FUSIL_POMPE:
 												case OBJ_MITRAILLETTE:
 													
+													degradation_equip_arme(act->initj);//degradation de l'arme
 													 if(genrand_int32()%101+act->initj->force*2>45)
 												   	 {
 												   	 	//message: vous brisez l obstacle
-												   	 	
-												   	 	//si le tile est une porte, suppression de la porte
+												   	 
+														//si le tile est une porte, suppression de la porte
 														if(monde[carte_active]->donnee_carte[act->initj->y+act->y][act->initj->x+act->x].type==TILE_PORTE_FRAGILE)
 												   	 	{
 												   	 		ajouter_mess_console("La porte se brise sous vos coups.",al_map_rgb(255,255,0));
@@ -1330,7 +1503,7 @@ int moteur_jeu::execute_action_cac(action *act)
 												   	 	}
 												   	 	else //sinon suppression de la vitre et mise en place de morceau de verre par terre
 												   	 	{
-												   	 		 ajouter_mess_console("La crosse de votre arme passez au travers de la vitre et la fait exploser en de minuscules morceaux.",al_map_rgb(255,255,0));
+												   	 		 ajouter_mess_console("La crosse de votre arme passe au travers de la vitre et la fait exploser en de minuscules morceaux.",al_map_rgb(255,255,0));
 												   	 			placer_tile(&monde[carte_active]->donnee_carte[act->initj->y+act->y][act->initj->x+act->x],TILE_SOL_VERRE);	
 												   	 			vider_champ_vision_carte(monde[carte_active]);
 																calcul_champ_vision();
@@ -1349,6 +1522,7 @@ int moteur_jeu::execute_action_cac(action *act)
 												case OBJ_COUTEAU:
 												case OBJ_COUTEAU_CMBT:	
 													
+													degradation_equip_arme(act->initj);//degradation de l'arme
 													 if(genrand_int32()%101+act->initj->force*2>60)
 												   	 {
 												   	 	//message: vous brisez l obstacle
@@ -1356,21 +1530,27 @@ int moteur_jeu::execute_action_cac(action *act)
 												   	 	//si le tile est une porte, suppression de la porte
 														if(monde[carte_active]->donnee_carte[act->initj->y+act->y][act->initj->x+act->x].type==TILE_PORTE_FRAGILE)
 												   	 	{
-												   	 		
+												   	 		ajouter_mess_console("Vous faites exploser le bois autour de la porte a l'aide de votre lame.",al_map_rgb(255,255,255));
+		
 												   	 		placer_tile(&monde[carte_active]->donnee_carte[act->initj->y+act->y][act->initj->x+act->x],TILE_SOL);
 												   	 		vider_champ_vision_carte(monde[carte_active]);
 															calcul_champ_vision();
 												   	 	}
 												   	 	else //sinon suppression de la vitre et mise en place de morceau de verre par terre
 												   	 	{
-												   	 			placer_tile(&monde[carte_active]->donnee_carte[act->initj->y+act->y][act->initj->x+act->x],TILE_SOL_VERRE);	
-												   	 			vider_champ_vision_carte(monde[carte_active]);
-																calcul_champ_vision();
+											   	 			ajouter_mess_console("La lame traverse la vitre, elle s'effondre en des centaines de morceaux coupants.",al_map_rgb(255,255,255));
+
+
+											   	 			placer_tile(&monde[carte_active]->donnee_carte[act->initj->y+act->y][act->initj->x+act->x],TILE_SOL_VERRE);	
+											   	 			vider_champ_vision_carte(monde[carte_active]);
+															calcul_champ_vision();
 														}
 												   	 }
 												   	 else
 												   	 {
 												   	 	//message: vous n arrivez as a casser l obstacle
+												   	 	ajouter_mess_console("Vous n'arrivez pas a brisez l'obstacle.",al_map_rgb(255,255,255));
+
 												   	 }
 			
 												break;
@@ -1405,6 +1585,7 @@ int moteur_jeu::execute_action_cac(action *act)
 												   	 else
 												   	 {
 												   	 	//message: vous n arrivez as a casser l obstacle
+												   	 	ajouter_mess_console("Vous n'arrivez pas a briser l'obstacle.",al_map_rgb(255,255,255));
 												   	 }
 												   	
 												   }
@@ -1413,6 +1594,7 @@ int moteur_jeu::execute_action_cac(action *act)
 							    			
 							    		}
 							    		
+							    		break;
 							    		
 							    	case DESTRUC_MOYEN:
 							    		
@@ -1420,33 +1602,38 @@ int moteur_jeu::execute_action_cac(action *act)
 							    		{
 							    			if(objet_est_arme(act->initj->equipement[EQUIPMNT_MAIN_D]))
 							    			{
-							    				
-							    				 if(genrand_int32()%101+act->initj->force>65)
+							    				degradation_equip_arme(act->initj);//degradation de l'arme
+							    				 if(genrand_int32()%101+act->initj->force>85)
 												{
 												   	placer_tile(&monde[carte_active]->donnee_carte[act->initj->y+act->y][act->initj->x+act->x],TILE_SOL);
+													ajouter_mess_console("Vous brisez l'obstacle.",al_map_rgb(255,255,255));
+							    			
 													vider_champ_vision_carte(monde[carte_active]);
 													calcul_champ_vision();
 												}
 												else
 												{
 													//message vous frapper l'obstacle, mais impossible de le briser
+													ajouter_mess_console("Vous frappez l'obstacle de toutes vos forces, en vain!",al_map_rgb(255,255,255));
+							    			
 												}
 							    				
 							    			}
 							    		}
 							    		else
 							    		{
-							    			
+							    			ajouter_mess_console("Impossible de briser cela a main nue!",al_map_rgb(255,255,255));
 							    			//message: impossible de briser cela a main nue
 							    		}
 							    		
 							    	break;	
 							    	case DESTRUC_DUR:
-							    	
+							    	ajouter_mess_console("Vous n'arrivez pas a brisez cet obstacle.",al_map_rgb(255,255,255));
 							    		//message Vous n arrivez pas a briser cet obstacle
 							    	break;
 							    }
-					
+					break;
+					///////////////////////////////////////////////
 					case 2: //tile incassable
 					// message: en fonction du tile
 							  	switch(monde[carte_active]->donnee_carte[act->initj->y+act->y][act->initj->x+act->x].type)
@@ -1466,9 +1653,67 @@ int moteur_jeu::execute_action_cac(action *act)
 								 //
 								   	
 							  	}
+					break;	
+					///////////////////////////////////////	  	
 					case 3: //mobilier
 					//message: vous frappez le mobilier de toute vos forces -> A VOIR POUR BOUTEILLE GAZ ET CONTENEUR ACIDE
-								break;
+					   
+					   mobilier=obtenir_mobilier(monde[carte_active],act->initj->x+act->x, act->initj->y+act->y);
+
+					   if(mobilier->acteur_type==ACTEUR_BOUTEILLE_GAZ || mobilier->acteur_type==ACTEUR_CONTENEUR_ACIDE)
+					   {
+
+								   if(act->initj->equipement[EQUIPMNT_MAIN_D]==NULL)
+								{
+									//degat = degat minimum + tirage nb_aletaoire sur moitie de force
+									degat=1+genrand_int32()%(act->initj->force/2+1);
+								}
+								else if(act->initj->equipement[EQUIPMNT_MAIN_D]->objet_type==OBJ_PISTOLET ||
+										act->initj->equipement[EQUIPMNT_MAIN_D]->objet_type==OBJ_FUSIL_POMPE ||
+										act->initj->equipement[EQUIPMNT_MAIN_D]->objet_type==OBJ_MITRAILLETTE )
+								{
+									// Avec arme à feu bonus de frappe de  rand()%3
+									degat=1+genrand_int32()%(2+1)+genrand_int32()%(act->initj->force/2+1);
+								}
+								else 
+								{
+									degat=1+genrand_int32()%(act->initj->equipement[EQUIPMNT_MAIN_D]->degat+1)+genrand_int32()%(act->initj->force/2+1);
+									
+								}
+								
+								// Prise en compte du bonus/malus cac
+								if(act->initj->combat_cac)degat=degat+genrand_int32()%(degat/2+1);
+								
+								mobilier->vie-=degat;
+								degradation_equip_arme(act->initj);//degradation de l'arme
+												printf("bouteille gaz et co %d\n",mobilier->vie);								
+								if(mobilier->vie<=0) // Le conteneur ou la bouteille pète
+								{
+									
+									  if(mobilier->acteur_type==ACTEUR_BOUTEILLE_GAZ)
+									  {
+									  	
+										// Message l'acide vous éclabousse et endommage votre materiel
+									  	if(detruire_bouteille_gaz(monde[carte_active],mobilier,act->initj)==1)return 2;
+										vider_champ_vision_carte(monde[carte_active]);
+										calcul_champ_vision();
+									  	   	
+									  }
+									  else if(mobilier->acteur_type==ACTEUR_CONTENEUR_ACIDE)
+									  {
+									  	// Message l'acide vous éclabousse et endommage votre materiel
+									  	detruire_conteneur_acide(monde[carte_active],mobilier);
+										vider_champ_vision_carte(monde[carte_active]);
+										calcul_champ_vision();
+									  	
+									  }
+									
+								}
+								
+					   }
+					  
+					
+					break;
 					default:	
 					break;
 				} 
@@ -1477,6 +1722,8 @@ int moteur_jeu::execute_action_cac(action *act)
 		
 		
 	}
+	
+	
 	//ATTAQUE DES PNJ
 	if(act->initc!=NULL && est_vivant(act->initc))
 	{
@@ -1553,10 +1800,17 @@ int moteur_jeu::execute_action_prise_objet(action *act)
 		
 		if(act->ciblec==NULL)// si pas de cible, l'objet se trouve par terre
 		{
-			
-			
+			//GESTION DES CLE
+			if(monde[carte_active]->objet_tab[act->nb1]->objet_type==OBJ_CLE)
+			{
+				monde[carte_active]->objet_tab[act->nb1]=NULL;
+				monde[carte_active]->cle_acquise=true;
+				return 0;
+			}
+			/////////////
 			if(sac)
 			{
+				
 				act->initj->sac_contenu[emplacement]=monde[carte_active]->objet_tab[act->nb1];
 				monde[carte_active]->objet_tab[act->nb1]=NULL;
 			}
@@ -1569,6 +1823,14 @@ int moteur_jeu::execute_action_prise_objet(action *act)
 		}
 		else
 		{
+			// GESTION DES CLE
+			if(act->ciblec->equipement[act->nb1]->objet_type==OBJ_CLE)
+			{
+				act->ciblec->equipement[act->nb1]=NULL;
+				monde[carte_active]->cle_acquise=true;
+				return 0;
+			}
+			/////////////////
 			if(sac)
 			{
 				act->initj->sac_contenu[emplacement]=act->ciblec->equipement[act->nb1];;
@@ -1620,7 +1882,7 @@ int moteur_jeu::execute_action_clancer(action *act)
 ///////////////
 int moteur_jeu::execute_action_cafeur(action *act)
 {
-   acteur *ac;	
+   acteur *ac,*mb;	
    int x2,y2;	
    int x1,y1;
    int x,y;
@@ -1628,77 +1890,35 @@ int moteur_jeu::execute_action_cafeur(action *act)
    int nbballe=0;
    int balle_prise;
    
+   int degat=0;
+   int coup_critique=0;
+   int  critique=0;
+   bool mort=false;
+   int protection=0;
+   char message[1024];
+   
    int dy;
    int dx;
    int err;
    int e2;
    int signx,signy;
-   
-	/*
-	int dx=abs(x2-x1);
-	int dy=abs(y2-y1);
-	int err=dx-dy;
-	int e2;
-	int signx=-1;
-	int signy=-1;
-	
-	if(x2>x1)signx=1;
-	if(y2>y1)signy=1;
-	
-	int x=x1;
-	int y=y1;
-	while(1)
-	{
-	//	printf("x %d, y %d\n",x,y);
-	
-		monde[carte_active]->donnee_carte[y][x].decouvert=true;
-		monde[carte_active]->donnee_carte[y][x].champ_vision=true;
-		if(monde[carte_active]->donnee_carte[y][x].transparent==false)break;
-		//ope sur position x;y
-		if(x==x2 && y==y2)break;
-		
-		e2=2*err;
-			if(e2>-dy)
-			{
-				err-=dy;
-				x+=signx;
-			}
-		
-		if(x==x2 && y==y2)
-		{
-			monde[carte_active]->donnee_carte[y][x].decouvert=true;
-			monde[carte_active]->donnee_carte[y][x].champ_vision=true;
-			//ope sur position;
-		break;
-		}
-		if(e2<dx)
-		{
-			err+=dx;
-			y+=signy;
-		}
-			
-		
-	}*/
-	
-
-/* explication du systeme de tir .
-
-Lorsqu'une cible est donnée:
-
-1 ere partie-> calcul du tir entre le joueur et la cible
-
-entre ces deux points peux exister des personnages ou du mobilier.
-  Pour prendre en compte la protection des acteurs contre le mobilier voila la formule.
   
-  distance joueur cible <= 4 -> faible proba de toucher les obstacle entre le joueur et la cible
-
-  distance joueur cible > 4 -> proba de toucher un obstacle augmente en fonction de la distance
-*/	
+   
+   int proba=80;// Probabilite de toucher un obstacle 
+   				// Modification en fonction des  carac du joeur
 
 	
 	if(act->initj!=NULL)
 	{
+		// ******************CALCUL DU MODIFICATEUR DE PROBA
+		// ****************** DE TOUCHER UN OBSTACLE
+		if(act->initj->tireur_sang_froid)
+		{
+			proba=-20; // Bonus -20% sur la proba de toucher un obstacle  
+		}
+		// ********************************************************
 		
+		// *****************Gestion d'une arme vide
 		if(act->initj->equipement[EQUIPMNT_MAIN_D]->munition<=0)
 		{
 			ajouter_mess_console("Malgre le clic de la detente, rien ne se produit. L'arme doit etre vide", al_map_rgb(255,0,0));	
@@ -1713,7 +1933,7 @@ entre ces deux points peux exister des personnages ou du mobilier.
 		    act->initj->equipement[EQUIPMNT_MAIN_D]->munition--;
 			break;
 			case OBJ_MITRAILLETTE:
-			nbballe=genrand_int32()%6;
+			nbballe=3+genrand_int32()%5;
 			if(act->initj->equipement[EQUIPMNT_MAIN_D]->munition<nbballe)nbballe=act->initj->equipement[EQUIPMNT_MAIN_D]->munition;
 			act->initj->equipement[EQUIPMNT_MAIN_D]->munition-=nbballe;
 			break;
@@ -1728,6 +1948,7 @@ entre ces deux points peux exister des personnages ou du mobilier.
 			//initialisation algo ligne
 			x2=act->x;
 			y2=act->y;
+			
 			x1=act->initj->x;
 			y1=act->initj->y;
 			x=act->initj->x;
@@ -1754,126 +1975,159 @@ entre ces deux points peux exister des personnages ou du mobilier.
 							
 							/************************************************
 							**********GESTION DES INTERACTION AVEC LES TILES*/
-							if(monde[carte_active]->donnee_carte[y][x].bloquant)
-							{
-								
-								if(monde[carte_active]->donnee_carte[y][x].type==TILE_BARREAUX)
-								{
-								 //Barreaux -> la balle traverse	
-								}
-								else if(monde[carte_active]->donnee_carte[y][x].type==TILE_VITRE)// DESTRUCTION PANNEAU VERRES PAR BALLES
-								{
-									if(act->initj->equipement[EQUIPMNT_MAIN_D]->objet_type==OBJ_MITRAILLETTE)
-									ajouter_mess_console("Le panneau de verre est traverse par les munitions. Il s'affaisse et eclate en de milliers de morceaux.", al_map_rgb(255,255,255));
-									else 
-									ajouter_mess_console("La munition brise le panneau de verre.", al_map_rgb(255,255,255));
-									
-									placer_tile(&monde[carte_active]->donnee_carte[y][x],TILE_SOL_VERRE);
-									vider_champ_vision_carte(monde[carte_active]);
-									calcul_champ_vision();	
-								}
-								else if(monde[carte_active]->donnee_carte[y][x].type==TILE_PORTE_FRAGILE)//DESTRUCTION DE LA PORTE FRAGILE PAR BALLES
-								{
-									
-									if(act->initj->equipement[EQUIPMNT_MAIN_D]->objet_type==OBJ_MITRAILLETTE )
-									{
-										if(genrand_int32()%101<95){
-										
-											ajouter_mess_console("Le frele panneau de bois de la porte est reduis en sciure pour vos balles.", al_map_rgb(255,255,255));
-											placer_tile(&monde[carte_active]->donnee_carte[y][x],TILE_SOL);
-											vider_champ_vision_carte(monde[carte_active]);
-											calcul_champ_vision();
-										}
-										else
-										{
-											ajouter_mess_console("La porte stoppe toutes vos munitions", al_map_rgb(255,255,255));
-											return 1;
-										}
-									}
-									else
-									{ 
-										 if(genrand_int32()%101<70){
-										 
-											ajouter_mess_console("Le panneau de bois s'ouvre en deux sous l'impact de la balle.", al_map_rgb(255,255,255));
-											
-											placer_tile(&monde[carte_active]->donnee_carte[y][x],TILE_SOL_VERRE);
-											vider_champ_vision_carte(monde[carte_active]);
-											calcul_champ_vision();
-										}
-										else
-										{
-											ajouter_mess_console("La porte arrete votre munition...", al_map_rgb(255,255,255));
-											return 1;
-										}
-									}
-								}
-								else 
-								{	
-								     if(act->initj->equipement[EQUIPMNT_MAIN_D]->objet_type==OBJ_MITRAILLETTE)
-									ajouter_mess_console("Les balles s'écrasent avec fracas contre la paroi.", al_map_rgb(255,0,0));
-									else 
-									ajouter_mess_console("La munition explose contre la paroi.", al_map_rgb(255,0,0));
-								
-									return 1;
-								}
-							}
-							/************************************************
-							*******FIN DE GESTION DES INTER AC LES TILES ***/
-							
+							if(interaction_balle_tile(NULL, act->initj,x, y)==1)return 0;
+ 
+						
 							/***********************************************
 							******GESTION DES INTERACTIONS AVEC LES ACTEURS ***
 							***********************************************/
 							ac=obtenir_ennemi(monde[carte_active],x,y);
+							mb=obtenir_mobilier(monde[carte_active],x, y);
 							if(ac!=NULL)// SI ENNEMI SURLE CHEMIN
 							{
-								if(proba_toucher_obstacle(x1,y1,x2,y2,x,y,75,2,4)){
+							
+								if( proba_toucher_pnj_non_cible(x,y,act->initj )){// SI L'ACTEUR EST TOUCHE
 									
 									//Calcul du nombre de balle arreté
 									switch(act->initj->equipement[EQUIPMNT_MAIN_D]->objet_type)
 									{
 										case OBJ_MITRAILLETTE:
-											balle_prise=genrand_int32()%(nbballe+1);
-											
-											// CALCUL DES DEGATS
-											
-											
+											balle_prise=1+genrand_int32()%(nbballe);
 											nbballe-=balle_prise;
+											// CALCUL DES DEGATS
+											calcappliq_degat_obstacle(act->initj,NULL,ac,balle_prise);
+											
+											// SI TOUTES LES BALLES ONT ETE ARRETES
+											if(nbballe<=0)
+											{
+											ajouter_mess_console("Un dommage collateral stoppe les balles avec sa tete.", al_map_rgb(255,0,0));	
+											return 2;
+											}
+											else //SI QUELQUES BALLES SONT ARRETEE
+											{
+											ajouter_mess_console("Une partie des balles est stoppee par un corps qui passait par la! Pas de chance...", al_map_rgb(255,0,0));	
+											}
 										break;
 										//
 										case OBJ_FUSIL_POMPE:
-										
+											calcappliq_degat_obstacle(act->initj,NULL,ac,1);
+										    ajouter_mess_console("Vous offrez un lifting gratuit a la chevrotine au pauvre here qui passait par la!", al_map_rgb(255,0,0));
+											return 0;
 										break;
 										//
 										case OBJ_PISTOLET:
-										
+										   	calcappliq_degat_obstacle(act->initj,NULL,ac,1);
+											ajouter_mess_console("La balle s'integre parfaitement dans le corps de la chose qui passait par la!", al_map_rgb(255,0,0));
+											return 0;
 										break;
 										//
 									}
 									
 								}
 							}
-							else if(mobilier_present(monde[carte_active],x, y)) // SI MOBILIER SUR LE CHEMIN
+							else if(mb!=NULL) // SI MOBILIER SUR LE CHEMIN
 							{
-								if(proba_toucher_obstacle(x1,y1,x2,y2,x,y,75,3,4)){
+								printf("toto");
+								
+								if(proba_toucher_obstacle(x1,y1,x2,y2,x,y,proba,3,4)){
+									
+									//Calcul du nombre de balle arreté
+									switch(act->initj->equipement[EQUIPMNT_MAIN_D]->objet_type)
+									{
+										case OBJ_MITRAILLETTE:
+											balle_prise=1+genrand_int32()%(nbballe);
+											nbballe-=balle_prise;
+											// CALCUL DES DEGATS
+											calcappliq_degat_obstacle(act->initj,NULL,mb,balle_prise);
+											printf("obstacle chemin %d",mb->vie);
+											// Gestion des explosions et de l acide.
+											 if(mb->vie<=0 && mb->acteur_type==ACTEUR_BOUTEILLE_GAZ)
+											 {
+											 	 	ajouter_mess_console("La bouteille de gaz explose.",al_map_rgb(0,0,255));
+												  	if(detruire_bouteille_gaz(monde[carte_active],mb,act->initj)==1)return 2;
+												    vider_champ_vision_carte(monde[carte_active]);
+													calcul_champ_vision();
+									  	
+											 }
+											 else if(mb->vie<=0 && mb->acteur_type==ACTEUR_CONTENEUR_ACIDE)
+											 {
+											 	    ajouter_mess_console("Le conteneur en acide est eventre par vos munitions. De l'acide sulfurique se repand sur le sol.",al_map_rgb(0,0,255));
+											 	  	detruire_conteneur_acide(monde[carte_active],mb);
+												   	vider_champ_vision_carte(monde[carte_active]);
+													calcul_champ_vision();
+									  	
+											 }
+													
+											// SI TOUTES LES BALLES ONT ETE ARRETES
+											if(nbballe<=0)
+											{
+												ajouter_mess_console("Vous arrachez la moitie du mobilier avec votre rafale!", al_map_rgb(255,255,255));
+											return 0;
+											}
+											else //SI QUELQUES BALLES SONT ARRETEE
+											{
+												ajouter_mess_console("Le mobilier stoppe net une partie de vos balles, ils ne doivent pas etre de marque ichiea!", al_map_rgb(255,255,255));	
+											}
+										break;
+										//
+										case OBJ_FUSIL_POMPE:
+											calcappliq_degat_obstacle(act->initj,NULL,mb,1);
+											ajouter_mess_console("La charge de chevrotine est stoppee par du mobilier", al_map_rgb(255,255,255));		
+											// Gestion des explosions et de l acide.
+											 if(mb->vie<=0 && mb->acteur_type==ACTEUR_BOUTEILLE_GAZ)
+											 {
+											 	 	ajouter_mess_console("La bouteille de gaz explose.",al_map_rgb(0,0,255));
+												  	if(detruire_bouteille_gaz(monde[carte_active],mb,act->initj)==1)return 2;
+												    vider_champ_vision_carte(monde[carte_active]);
+													calcul_champ_vision();
+									  			
+											 }
+											 else if(mb->vie<=0 && mb->acteur_type==ACTEUR_CONTENEUR_ACIDE)
+											 {
+											 	    ajouter_mess_console("Le conteneur en acide est eventre par vos munitions. De l'acide sulfurique se repand sur le sol.",al_map_rgb(0,0,255));
+													detruire_conteneur_acide(monde[carte_active],mb);
+												  	vider_champ_vision_carte(monde[carte_active]);
+													calcul_champ_vision();
+									  	
+											 }
+											
+											return 0;
+										break;
+										//
+										case OBJ_PISTOLET:
+										   	calcappliq_degat_obstacle(act->initj,NULL,mb,1);
+											ajouter_mess_console("La balle se loge dans le mobilier.", al_map_rgb(255,255,255));	
+											// Gestion des explosions et de l acide.
+											 if(mb->vie<=0 && mb->acteur_type==ACTEUR_BOUTEILLE_GAZ)
+											 {
+											 	 	ajouter_mess_console("La bouteille de gaz explose.",al_map_rgb(0,0,255));
+													if(detruire_bouteille_gaz(monde[carte_active],mb,act->initj)==1)return 2;
+												  	vider_champ_vision_carte(monde[carte_active]);
+													calcul_champ_vision();
+									  			  
+												
+											 }
+											 else if(mb->vie<=0 && mb->acteur_type==ACTEUR_BOUTEILLE_GAZ)
+											 {
+											 	    ajouter_mess_console("Le conteneur en acide est eventre par vos munitions. De l'acide sulfurique se repand sur le sol.",al_map_rgb(0,0,255));
+													detruire_conteneur_acide(monde[carte_active],mb);
+												 	vider_champ_vision_carte(monde[carte_active]);
+													calcul_champ_vision();
+									  	
+											 }
+											
+											return 0;
+										break;
+										//
+									}
 									
 									
 								}
 							}
-							/*
-							// Fonction pour récuperer un pointeur vers l'eventuel
-							// pnj present en x, y
-							acteur* obtenir_ennemi(carte *crte,int x, int y);
 							
-							// fonction pour savoir si du mobilier existe en x et y
-							bool mobilier_present(carte *crte,int x, int  y);
-							*/
 							/**********************************************
 							*** FIN DE GESTION DES INTER AVEC LES ACTEURS*/
-						//	proba_toucher_obstacle(int x1,int y1,int x2,int y2,int x,int y,int prctage,int pctage_proche,int dist_reduit);		
-		
-							//TRAITEMENT POSITION
-							//  obtenir_ennemi(carte *crte,int x, int y)
-							
+												
 							e2=2*err;
 								if(e2>-dy)
 								{
@@ -1896,13 +2150,1383 @@ entre ces deux points peux exister des personnages ou du mobilier.
 						}
 				///////////////
 			
-			/*******************************/	
+			/******************************************************************
+			***********CALCUL DES EVENTUELS DEGATS SUR LA CIBLE EVENTUELLE****************
+			******************************************************************/
+							
+							/************************************************
+							**********GESTION DES INTERACTION AVEC LES TILES*/
+								if(interaction_balle_tile(NULL, act->initj,x, y)==1)return 0;
+							/************************************************
+							*******FIN DE GESTION DES INTER AC LES TILES ***/
+							
+			ac=obtenir_ennemi(monde[carte_active],x,y);
+			mb=obtenir_mobilier(monde[carte_active],x, y);
+			printf("obtenir ennemi %d x %d, y %d\n",obtenir_ennemi(monde[carte_active],x,y),x,y);
+			if(ac!=NULL)  // GESTION DE LA CIBLE EVENTUELLE
+			{
+				printf("Cible ennemi trouvee \n");
+			     if(calcul_cible_atteinte(act->initj,NULL,ac))
+			     {
+			     	
+			     	///////////////////////////////////
+			     	///////GESTION DES COUPS CRITIQUES
+			     	            critique=genrand_int32()%1001; //tirage proba coup critique							
+								if(act->initj->maudit)
+								{
+								  if(critique >=920)coup_critique=-1;
+								  if(critique<=act->initj->coup_critique*5)coup_critique=1;
+								  	
+								}
+								else if(act->initj->tireur_sang_froid)// pas d echec critique 
+								{
+									if(critique<=act->initj->coup_critique)coup_critique=1;
+									
+								}
+								else 
+								{	
+									// ECHEC CRITIQUE -> FORMULE  1000-100/dexterite au pire 10% de chance de foirer. Au mieux 0.5%
+								
+									if(critique>= 1000-100/act->initj->dexterite)coup_critique=-1;
+									if(critique<=act->initj->coup_critique)coup_critique=1;
+								}
+				 	////////FIN GESTION DES COUPS CRITIQUES
+				 	///////////////////////////////////////
+				 	
+				 	degat=nbballe*act->initj->equipement[EQUIPMNT_MAIN_D]->degat;
+				 	
+				 	// Gestion tireur sang froid
+					 if(act->initj->tireur_sang_froid)
+				 	{
+				 		degat*=4/3;
+				 	}
+				 	
+				 	// CALCUL DES DEGATS 
+				 	switch(coup_critique)
+				 	{
+				 		/***************************************************************************************/
+				 		case 1:
+									//Message coup_critique, vous passez au travers des defenses de l'ennemi.
+
+									// diminution de la vie du PNJ
+									ac->vie-=degat*4/3;
+									
+									// CALCUL DE L AJOUT D ADRENALINE
+									if(ac->vie<=0) mort=true;
+									 ajout_adrenaline(act->initj,0,degat*4/3,mort);
+									
+									if(mort)
+									{
+									 sprintf(message,"Coup Critique, vous passez a travers les defenses de l'ennemi, le tuant sur le coup! Dgt:%d",degat*4/3) ;
+									 ajout_score_mort_monstre(act->initj,ac);
+									}
+									else
+									{
+									 sprintf(message,"Coup Critique, vous passez a travers les defenses de l'ennemi. Dgt:%d",degat*4/3);
+									}
+									
+									ajouter_mess_console(message,al_map_rgb(255,0,0));
+									// Gestion de la degradation des armes
+								 	if(degradation_equip_arme(act->initj)==1)
+								  	{
+								  		ajouter_mess_console("Usee par de nombreux usages, votre arme rend l'ame.",al_map_rgb(0,0,255));
+								  	}
+									break;
+						/*************************************************************************************/			
+						case 0:
+									
+									
+									protection=calcul_protec(ac);
+									//Diminition de la vie du PNJ. Limitation de degat grace aux protection.
+									ac->vie-=(degat*(100-protection))/100;
+									
+									//degradation des equipements de protection/
+									degradation_equip_protec(ac);
+						
+									// CALCUL DE L AJOUT D ADRENALINE
+									if(ac->vie<=0) mort=true;
+									 ajout_adrenaline(act->initj,0,(degat*(100-protection))/100,mort);
+									 if(mort)
+									 {
+									  sprintf(message,"Vous frappez l'ennemi, votre coup lui ecrase la tete. Avec la puree qu'il a entre les oreilles, les seuls mouvements dont il est capable sont nerveux Dgt:%d",(degat*(100-protection))/100) ;
+									 ajout_score_mort_monstre(act->initj,ac);// Calcul du nouveau score du joueur
+									  
+									 }
+									 else 
+									 {
+									 	sprintf(message,"Vous tapez de toutes vos forces sur l'ennemi. Dgt:%d",degat*4/3);
+									 
+									 }
+									 ajouter_mess_console(message,al_map_rgb(255,0,0));
+									 
+								 //GESTION DE LA DEGRADATION DES ARMES
+								  	if(degradation_equip_arme(act->initj)==1)
+								  	{
+								  		ajouter_mess_console("Usee par de nombreux usages, votre arme rend l'ame.",al_map_rgb(0,0,255));
+								  	}
+									break;
+						/***********************************************************************************/			
+						case -1:
+									
+								    if(act->initj->equipement[EQUIPMNT_MAIN_D]!=NULL)
+									{
+										faire_saigner(act->initj);
+										delete act->initj->equipement[EQUIPMNT_MAIN_D];
+										act->initj->equipement[EQUIPMNT_MAIN_D]=NULL;
+										ajouter_mess_console("Echec critique, l'arme se desintegre dans votre main!",al_map_rgb(0,0,255));
+									}	 
+									// AJOUT DE L ADRENALINE
+									 ajout_adrenaline(act->initj,10,0,0);
+									break;
+				 		/***********************************************************************************/
+				 		
+				 	}
+				 	 
+				 return 1;	
+			     }
+			}
+			else if(mb!=NULL ) //GESTION DU MOBILIER EVENTUEL
+			{
+		 		 if(calcul_cible_atteinte(act->initj,NULL,mb))
+			     {
+				     	if(mb->acteur_type==ACTEUR_BOUTEILLE_GAZ || mb->acteur_type==ACTEUR_CONTENEUR_ACIDE)
+						{
+					
+						 ///////////////////////////////////
+			     	    ///////GESTION DES COUPS CRITIQUES
+			     	            critique=genrand_int32()%1001; //tirage proba coup critique							
+								if(act->initj->maudit)
+								{
+								  if(critique >=920)coup_critique=-1;
+								  if(critique<=act->initj->coup_critique*5)coup_critique=1;
+								  	
+								}
+								else if(act->initj->tireur_sang_froid)// pas d echec critique 
+								{
+									if(critique<=act->initj->coup_critique)coup_critique=1;
+									
+								}
+								else 
+								{	
+									// ECHEC CRITIQUE -> FORMULE  1000-100/dexterite au pire 10% de chance de foirer. Au mieux 0.5%
+								
+									if(critique>= 1000-100/act->initj->dexterite)coup_critique=-1;
+									if(critique<=act->initj->coup_critique)coup_critique=1;
+								}
+							 	////////FIN GESTION DES COUPS CRITIQUES
+							 	///////////////////////////////////////
+							 	
+							 		
+							 	degat=nbballe*act->initj->equipement[EQUIPMNT_MAIN_D]->degat;
+							 	
+							 	// Gestion tireur sang froid
+								 if(act->initj->tireur_sang_froid)
+							 	{
+							 		degat*=4/3;
+							 	}
+				 	
+				 	
+							 	// CALCUL DES DEGATS 
+							 	switch(coup_critique)
+							 	{
+							 		/***************************************************************************************/
+							 		case 1:
+												//Message coup_critique, vous passez au travers des defenses de l'ennemi.
+			
+												// degat pour coup critique
+												degat=degat*4/3;
+									/*************************************************************************************/			
+									case 0:
+												
+												mb->vie-=(degat);
+									
+												// CALCUL DE L AJOUT D ADRENALINE
+												if(mb->vie<=0) mort=true;
+											//	 ajout_adrenaline(act->initj,0,(degat*(100-protection))/100,mort);
+												 if(mort)
+												 {
+												      if(mb->acteur_type==ACTEUR_BOUTEILLE_GAZ)
+												      {
+												      	ajouter_mess_console("La bouteille de gaz explose.",al_map_rgb(0,0,255));
+														if(detruire_bouteille_gaz(monde[carte_active],mb,act->initj)==1)return 2;
+												  		vider_champ_vision_carte(monde[carte_active]);
+														calcul_champ_vision();
+									  		  
+												      }
+												      else if(mb->acteur_type==ACTEUR_CONTENEUR_ACIDE)
+												      {
+												      	ajouter_mess_console("Le conteneur en acide est eventre par vos munitions. De l'acide sulfurique se repand sur le sol.",al_map_rgb(0,0,255));
+												        detruire_conteneur_acide(monde[carte_active],mb);
+												      	vider_champ_vision_carte(monde[carte_active]);
+														calcul_champ_vision();
+									  	
+													  }
+												 }
+												 else
+												 {
+												 	
+												 }
+												
+											 //GESTION DE LA DEGRADATION DES ARMES
+											  	if(degradation_equip_arme(act->initj)==1)
+											  	{
+											  		ajouter_mess_console("Usee par de nombreux usages, votre arme rend l'ame.",al_map_rgb(0,0,255));
+											  	}
+												break;
+									/***********************************************************************************/			
+									case -1:
+												
+											    if(act->initj->equipement[EQUIPMNT_MAIN_D]!=NULL)
+												{
+													delete act->initj->equipement[EQUIPMNT_MAIN_D];
+													act->initj->equipement[EQUIPMNT_MAIN_D]=NULL;
+													ajouter_mess_console("Echec critique, l'arme se desintegre dans votre main!",al_map_rgb(0,0,255));
+												}	 
+												// AJOUT DE L ADRENALINE
+												 ajout_adrenaline(act->initj,10,0,0);
+												break;
+							 		/***********************************************************************************/
+							 		
+							 	}
+							 	//fin de calcul des degats
+				 				
+					    }
+					    else// GESTION DU MOBILIER DIFFERENT DE LA BOUTEILLE DE GAZ ET DU CONTENEUR D ACIDE
+					    {
+					    ajouter_mess_console("Vos munitions s'ecrasent contre le mobilier.",al_map_rgb(0,0,255));								 
+					    }
+			     
+			     	return 1;
+			 	}
+			 	
+			 	
+			}
+			
+			
+			/*****************************************************************
+			*************FIN DE CALCUL DE DEGAT******************
+			*****************************************************************/
+			
+			/*******************************************************************
+			**** CALCUL DU RESTE DE LA TRAJECTION SI LA BALLE N A RIEN TOUCHE**/
+			x=(x2-x1)*100;
+			y=(y2-y1)*100;
+			
+			y1=y2;
+			x1=x2;
+			y2+=y;
+			x2+=x;
+			x=x1;
+			y=y1;
+			/*******************************/
+			 
+			 dx=abs(x2-x1);
+			 dy=abs(y2-y1);
+			 err=dx-dy;
+			 
+			//deplacement de une case
+			e2=2*err;
+			if(e2>-dy)
+			{
+				err-=dy;
+				x+=signx;
+			}
+			if(e2<dx)
+			{
+				err+=dx;
+				y+=signy;
+			}
+			///////////////////////					
+			
+			//Algo de ligne
+						while(1)
+						{
+ 
+							//ope sur position x;y si on arrive sur la cible break
+							if(x==x2 && y==y2)break;
+							
+							
+							/************************************************
+							**********GESTION DES INTERACTION AVEC LES TILES*/
+							if(interaction_balle_tile(NULL, act->initj,x, y)==1)return 0;
+ 
+						
+							/***********************************************
+							******GESTION DES INTERACTIONS AVEC LES ACTEURS ***
+							***********************************************/
+							ac=obtenir_ennemi(monde[carte_active],x,y);
+							mb=obtenir_mobilier(monde[carte_active],x, y);
+							if(ac!=NULL)// SI ENNEMI SURLE CHEMIN
+							{
+							
+								if( proba_toucher_pnj_non_cible(x,y,act->initj )){// SI L'ACTEUR EST TOUCHE
+									
+									//Calcul du nombre de balle arreté
+									switch(act->initj->equipement[EQUIPMNT_MAIN_D]->objet_type)
+									{
+										case OBJ_MITRAILLETTE:
+											balle_prise=1+genrand_int32()%(nbballe);
+											nbballe-=balle_prise;
+											// CALCUL DES DEGATS
+											calcappliq_degat_obstacle(act->initj,NULL,ac,balle_prise);
+											
+											// SI TOUTES LES BALLES ONT ETE ARRETES
+											if(nbballe<=0)
+											{
+											ajouter_mess_console("Un dommage collateral stoppe les balles avec sa tete.", al_map_rgb(255,0,0));	
+											return 2;
+											}
+											else //SI QUELQUES BALLES SONT ARRETEE
+											{
+											ajouter_mess_console("Une partie des balles est stoppee par un corps qui passait par la! Pas de chance...", al_map_rgb(255,0,0));	
+											}
+										break;
+										//
+										case OBJ_FUSIL_POMPE:
+											calcappliq_degat_obstacle(act->initj,NULL,ac,1);
+										    ajouter_mess_console("Vous offrez un lifting gratuit a la chevrotine au pauvre here qui passait par la!", al_map_rgb(255,0,0));
+											return 0;
+										break;
+										//
+										case OBJ_PISTOLET:
+										   	calcappliq_degat_obstacle(act->initj,NULL,ac,1);
+											ajouter_mess_console("La balle s'integre parfaitement dans le corps de la chose qui passait par la!", al_map_rgb(255,0,0));
+											return 0;
+										break;
+										//
+									}
+									
+								}
+							}
+							else if(mb!=NULL) // SI MOBILIER SUR LE CHEMIN
+							{
+								printf("toto");
+								
+								if(proba_toucher_obstacle(x1,y1,x2,y2,x,y,proba,3,4)){
+									
+									//Calcul du nombre de balle arreté
+									switch(act->initj->equipement[EQUIPMNT_MAIN_D]->objet_type)
+									{
+										case OBJ_MITRAILLETTE:
+											balle_prise=1+genrand_int32()%(nbballe);
+											nbballe-=balle_prise;
+											// CALCUL DES DEGATS
+											calcappliq_degat_obstacle(act->initj,NULL,mb,balle_prise);
+											printf("obstacle chemin %d",mb->vie);
+											// Gestion des explosions et de l acide.
+											 if(mb->vie<=0 && mb->acteur_type==ACTEUR_BOUTEILLE_GAZ)
+											 {
+											 	 	ajouter_mess_console("La bouteille de gaz explose.",al_map_rgb(0,0,255));
+												    if(detruire_bouteille_gaz(monde[carte_active],mb,act->initj)==1)return 2;
+												  	vider_champ_vision_carte(monde[carte_active]);
+													calcul_champ_vision();
+									  	
+											 }
+											 else if(mb->vie<=0 && mb->acteur_type==ACTEUR_CONTENEUR_ACIDE)
+											 {
+											 	 	ajouter_mess_console("Le conteneur en acide est eventre par vos munitions. De l'acide sulfurique se repand sur le sol.",al_map_rgb(0,0,255));
+											 		detruire_conteneur_acide(monde[carte_active],mb);
+												    vider_champ_vision_carte(monde[carte_active]);
+													calcul_champ_vision();
+									  	
+											 }
+													
+											// SI TOUTES LES BALLES ONT ETE ARRETES
+											if(nbballe<=0)
+											{
+												ajouter_mess_console("Vous arrachez la moitie du mobilier avec votre rafale!", al_map_rgb(255,255,255));
+											return 2;
+											}
+											else //SI QUELQUES BALLES SONT ARRETEE
+											{
+												ajouter_mess_console("Le mobilier stoppe net une partie de vos balles, ils ne doivent pas etre de marque ichiea!", al_map_rgb(255,255,255));	
+											}
+										break;
+										//
+										case OBJ_FUSIL_POMPE:
+											calcappliq_degat_obstacle(act->initj,NULL,mb,1);
+											ajouter_mess_console("La charge de chevrotine est stoppee par du mobilier", al_map_rgb(255,255,255));		
+											// Gestion des explosions et de l acide.
+											 if(mb->vie<=0 && mb->acteur_type==ACTEUR_BOUTEILLE_GAZ)
+											 {
+											 	 	ajouter_mess_console("La bouteille de gaz explose.",al_map_rgb(0,0,255));
+												    if(detruire_bouteille_gaz(monde[carte_active],mb,act->initj)==1)return 2;
+												  	vider_champ_vision_carte(monde[carte_active]);
+													calcul_champ_vision();
+									  			
+											 }
+											 else if(mb->vie<=0 && mb->acteur_type==ACTEUR_CONTENEUR_ACIDE)
+											 {
+											 	 	ajouter_mess_console("Le conteneur en acide est eventre par vos munitions. De l'acide sulfurique se repand sur le sol.",al_map_rgb(0,0,255));
+													detruire_conteneur_acide(monde[carte_active],mb);
+												    vider_champ_vision_carte(monde[carte_active]);
+													calcul_champ_vision();
+									  	
+											 }
+											
+											return 0;
+										break;
+										//
+										case OBJ_PISTOLET:
+										   	calcappliq_degat_obstacle(act->initj,NULL,mb,1);
+											ajouter_mess_console("La balle se loge dans le mobilier.", al_map_rgb(255,255,255));	
+											// Gestion des explosions et de l acide.
+											 if(mb->vie<=0 && mb->acteur_type==ACTEUR_BOUTEILLE_GAZ)
+											 {
+											 	 	ajouter_mess_console("La bouteille de gaz explose.",al_map_rgb(0,0,255));
+													if(detruire_bouteille_gaz(monde[carte_active],mb,act->initj)==1)return 2;
+												  	vider_champ_vision_carte(monde[carte_active]);
+													calcul_champ_vision();
+									  			  
+												
+											 }
+											 else if(mb->vie<=0 && mb->acteur_type==ACTEUR_CONTENEUR_ACIDE)
+											 {
+											 	 	ajouter_mess_console("Le conteneur en acide est eventre par vos munitions. De l'acide sulfurique se repand sur le sol.",al_map_rgb(0,0,255));
+													detruire_conteneur_acide(monde[carte_active],mb);
+												    vider_champ_vision_carte(monde[carte_active]);
+													calcul_champ_vision();
+									  	
+											 }
+											
+											return 0;
+										break;
+										//
+									}
+									
+									
+								}
+							}
+							
+							/**********************************************
+							*** FIN DE GESTION DES INTER AVEC LES ACTEURS*/
+												
+							e2=2*err;
+								if(e2>-dy)
+								{
+									err-=dy;
+									x+=signx;
+								}
+							
+							if(x==x2 && y==y2)
+							{
+								//ope sur position;
+							break;
+							}
+							if(e2<dx)
+							{
+								err+=dx;
+								y+=signy;
+							}
+								
+							
+						}
+				///////////////	
 		}
-		else  // EMPLACEMENT NON STRIC-> POUR LES CIBLES ET LES DIRECTION
+		/**********************************************************************************
+		************************************************************************************
+		***************************************************************************
+		***************************GESTION DES EMPLACEMENT NON STRICT **********************
+		**********POUR LES CIBLES ET LES DIRECTION*******************/
+		else  
 		{ 
-		   if(!act->bool2)bonus_visee_cs=1;
+		   if(act->bool2) // Tir selon une direction
+		   {
+		   	// Calcul de la ligne de direction   
+		   	x1=act->initj->x;
+		   	y1=act->initj->y;
+		   	x2=act->initj->x+act->x*200;
+		   	y2=act->initj->y+act->y*200;
+		   	x=x1;
+		   	y=y1;
+		   	printf("Tir dans une direction donnee x1 %d y1 %d x2 %d y2 %d",x1,y1,x2,y2);
+		   	// *******************************
+		   	
+		   	
+		   	//calcul de la trajectoire
+			
+			 dx=abs(x2-x1);
+			 dy=abs(y2-y1);
+			 err=dx-dy;
+	
+			 signx=-1;
+			 signy=-1;
+			 if(x2>x1)signx=1;
+			 if(y2>y1)signy=1;
+			/////////////////////////
+			
+				//Algo de ligne
+						while(1)
+						{
+ 
+							//ope sur position x;y si on arrive sur la cible break
+							if(x==x2 && y==y2)break;
+							
+							
+							/************************************************
+							**********GESTION DES INTERACTION AVEC LES TILES*/
+							if(interaction_balle_tile(NULL, act->initj,x, y)==1)return 0;
+ 
+						
+							/***********************************************
+							******GESTION DES INTERACTIONS AVEC LES ACTEURS ***
+							***********************************************/
+							ac=obtenir_ennemi(monde[carte_active],x,y);
+							mb=obtenir_mobilier(monde[carte_active],x, y);
+							if(ac!=NULL)// SI ENNEMI SURLE CHEMIN
+							{
+							
+								if( proba_toucher_pnj_non_cible(x,y,act->initj )){// SI L'ACTEUR EST TOUCHE
+									
+									//Calcul du nombre de balle arreté
+									switch(act->initj->equipement[EQUIPMNT_MAIN_D]->objet_type)
+									{
+										case OBJ_MITRAILLETTE:
+											balle_prise=1+genrand_int32()%(nbballe);
+											nbballe-=balle_prise;
+											// CALCUL DES DEGATS
+											calcappliq_degat_obstacle(act->initj,NULL,ac,balle_prise);
+											
+											// SI TOUTES LES BALLES ONT ETE ARRETES
+											if(nbballe<=0)
+											{
+											ajouter_mess_console("Un dommage collateral stoppe les balles avec sa tete.", al_map_rgb(255,0,0));	
+											return 2;
+											}
+											else //SI QUELQUES BALLES SONT ARRETEE
+											{
+											ajouter_mess_console("Une partie des balles est stoppee par un corps qui passait par la! Pas de chance...", al_map_rgb(255,0,0));	
+											}
+										break;
+										//
+										case OBJ_FUSIL_POMPE:
+											calcappliq_degat_obstacle(act->initj,NULL,ac,1);
+										    ajouter_mess_console("Vous offrez un lifting gratuit a la chevrotine au pauvre here qui passait par la!", al_map_rgb(255,0,0));
+											return 0;
+										break;
+										//
+										case OBJ_PISTOLET:
+										   	calcappliq_degat_obstacle(act->initj,NULL,ac,1);
+											ajouter_mess_console("La balle s'integre parfaitement dans le corps de la chose qui passait par la!", al_map_rgb(255,0,0));
+											return 0;
+										break;
+										//
+									}
+									
+								}
+							}
+							else if(mb!=NULL) // SI MOBILIER SUR LE CHEMIN
+							{
+								printf("toto");
+								
+								if(proba_toucher_obstacle_tdirection( x, y, act->initj)){
+									
+									//Calcul du nombre de balle arreté
+									switch(act->initj->equipement[EQUIPMNT_MAIN_D]->objet_type)
+									{
+										case OBJ_MITRAILLETTE:
+											balle_prise=1+genrand_int32()%(nbballe);
+											nbballe-=balle_prise;
+											// CALCUL DES DEGATS
+											calcappliq_degat_obstacle(act->initj,NULL,mb,balle_prise);
+											printf("obstacle chemin %d",mb->vie);
+											// Gestion des explosions et de l acide.
+											 if(mb->vie<=0 && mb->acteur_type==ACTEUR_BOUTEILLE_GAZ)
+											 {
+											 	 	ajouter_mess_console("La bouteille de gaz explose.",al_map_rgb(0,0,255));
+												    if(detruire_bouteille_gaz(monde[carte_active],mb,act->initj)==1)return 2;
+												  	vider_champ_vision_carte(monde[carte_active]);
+													calcul_champ_vision();
+									  	
+											 }
+											 else if(mb->vie<=0 && mb->acteur_type==ACTEUR_CONTENEUR_ACIDE)
+											 {
+											 	 	ajouter_mess_console("Le conteneur en acide est eventre par vos munitions. De l'acide sulfurique se repand sur le sol.",al_map_rgb(0,0,255));
+											 		detruire_conteneur_acide(monde[carte_active],mb);
+												    vider_champ_vision_carte(monde[carte_active]);
+													calcul_champ_vision();
+									  	
+											 }
+													
+											// SI TOUTES LES BALLES ONT ETE ARRETES
+											if(nbballe<=0)
+											{
+												ajouter_mess_console("Vous arrachez la moitie du mobilier avec votre rafale!", al_map_rgb(255,255,255));
+											return 2;
+											}
+											else //SI QUELQUES BALLES SONT ARRETEE
+											{
+												ajouter_mess_console("Le mobilier stoppe net une partie de vos balles, ils ne doivent pas etre de marque ichiea!", al_map_rgb(255,255,255));	
+											}
+										break;
+										//
+										case OBJ_FUSIL_POMPE:
+											calcappliq_degat_obstacle(act->initj,NULL,mb,1);
+											ajouter_mess_console("La charge de chevrotine est stoppee par du mobilier", al_map_rgb(255,255,255));		
+											// Gestion des explosions et de l acide.
+											 if(mb->vie<=0 && mb->acteur_type==ACTEUR_BOUTEILLE_GAZ)
+											 {
+											 	 	ajouter_mess_console("La bouteille de gaz explose.",al_map_rgb(0,0,255));
+												    if(detruire_bouteille_gaz(monde[carte_active],mb,act->initj)==1)return 2;
+												  	vider_champ_vision_carte(monde[carte_active]);
+													calcul_champ_vision();
+									  			
+											 }
+											 else if(mb->vie<=0 && mb->acteur_type==ACTEUR_CONTENEUR_ACIDE)
+											 {
+											 	 	ajouter_mess_console("Le conteneur en acide est eventre par vos munitions. De l'acide sulfurique se repand sur le sol.",al_map_rgb(0,0,255));
+													detruire_conteneur_acide(monde[carte_active],mb);
+												    vider_champ_vision_carte(monde[carte_active]);
+													calcul_champ_vision();
+									  	
+											 }
+											
+											return 0;
+										break;
+										//
+										case OBJ_PISTOLET:
+										   	calcappliq_degat_obstacle(act->initj,NULL,mb,1);
+											ajouter_mess_console("La balle se loge dans le mobilier.", al_map_rgb(255,255,255));	
+											// Gestion des explosions et de l acide.
+											 if(mb->vie<=0 && mb->acteur_type==ACTEUR_BOUTEILLE_GAZ)
+											 {
+											 	 	ajouter_mess_console("La bouteille de gaz explose.",al_map_rgb(0,0,255));
+													if(detruire_bouteille_gaz(monde[carte_active],mb,act->initj)==1)return 2;
+												  	vider_champ_vision_carte(monde[carte_active]);
+													calcul_champ_vision();
+									  			  
+												
+											 }
+											 else if(mb->vie<=0 && mb->acteur_type==ACTEUR_CONTENEUR_ACIDE)
+											 {
+											 	 	ajouter_mess_console("Le conteneur en acide est eventre par vos munitions. De l'acide sulfurique se repand sur le sol.",al_map_rgb(0,0,255));
+													detruire_conteneur_acide(monde[carte_active],mb);
+												    vider_champ_vision_carte(monde[carte_active]);
+													calcul_champ_vision();
+									  	
+											 }
+											
+											return 0;
+										break;
+										//
+									}
+									
+									
+								}
+							}
+							
+							/**********************************************
+							*** FIN DE GESTION DES INTER AVEC LES ACTEURS*/
+												
+							e2=2*err;
+								if(e2>-dy)
+								{
+									err-=dy;
+									x+=signx;
+								}
+							
+							if(x==x2 && y==y2)
+							{
+								//ope sur position;
+							break;
+							}
+							if(e2<dx)
+							{
+								err+=dx;
+								y+=signy;
+							}
+								
+							
+						}
+				///////////////
+				   	
+		   }
+		   else // GESTION DU TIR SUR LA CIBLE 
+		   {
+		   	    /*CALCUL PREMIER CHEMIN DE LA BALLE OU DES BALLES: chemin joueur_ennemi	*/
+			//initialisation algo ligne
+			x2=act->ciblec->x;
+			y2=act->ciblec->y;
+			
+			x1=act->initj->x;
+			y1=act->initj->y;
+			x=act->initj->x;
+			y=act->initj->y;
+			
+			
+			 dx=abs(x2-x1);
+			 dy=abs(y2-y1);
+			 err=dx-dy;
+	
+			 signx=-1;
+			 signy=-1;
+			 if(x2>x1)signx=1;
+			 if(y2>y1)signy=1;
+			/////////////////////////
+			
+				//Algo de ligne
+						while(1)
+						{
+ 
+							//ope sur position x;y si on arrive sur la cible break
+							if(x==x2 && y==y2)break;
+							
+							
+							/************************************************
+							**********GESTION DES INTERACTION AVEC LES TILES*/
+							if(interaction_balle_tile(NULL, act->initj,x, y)==1)return 0;
+ 
+						
+							/***********************************************
+							******GESTION DES INTERACTIONS AVEC LES ACTEURS ***
+							***********************************************/
+							ac=obtenir_ennemi(monde[carte_active],x,y);
+							mb=obtenir_mobilier(monde[carte_active],x, y);
+							if(ac!=NULL)// SI ENNEMI SURLE CHEMIN
+							{
+							
+								if( proba_toucher_pnj_non_cible(x,y,act->initj )){// SI L'ACTEUR EST TOUCHE
+									
+									//Calcul du nombre de balle arreté
+									switch(act->initj->equipement[EQUIPMNT_MAIN_D]->objet_type)
+									{
+										case OBJ_MITRAILLETTE:
+											balle_prise=1+genrand_int32()%(nbballe);
+											nbballe-=balle_prise;
+											// CALCUL DES DEGATS
+											calcappliq_degat_obstacle(act->initj,NULL,ac,balle_prise);
+											
+											// SI TOUTES LES BALLES ONT ETE ARRETES
+											if(nbballe<=0)
+											{
+											ajouter_mess_console("Un dommage collateral stoppe les balles avec sa tete.", al_map_rgb(255,0,0));	
+											return 2;
+											}
+											else //SI QUELQUES BALLES SONT ARRETEE
+											{
+											ajouter_mess_console("Une partie des balles est stoppee par un corps qui passait par la! Pas de chance...", al_map_rgb(255,0,0));	
+											}
+										break;
+										//
+										case OBJ_FUSIL_POMPE:
+											calcappliq_degat_obstacle(act->initj,NULL,ac,1);
+										    ajouter_mess_console("Vous offrez un lifting gratuit a la chevrotine au pauvre here qui passait par la!", al_map_rgb(255,0,0));
+											return 0;
+										break;
+										//
+										case OBJ_PISTOLET:
+										   	calcappliq_degat_obstacle(act->initj,NULL,ac,1);
+											ajouter_mess_console("La balle s'integre parfaitement dans le corps de la chose qui passait par la!", al_map_rgb(255,0,0));
+											return 0;
+										break;
+										//
+									}
+									
+								}
+							}
+							else if(mb!=NULL) // SI MOBILIER SUR LE CHEMIN
+							{
+								printf("toto");
+								
+								if(proba_toucher_obstacle(x1,y1,x2,y2,x,y,proba,3,4)){
+									
+									//Calcul du nombre de balle arreté
+									switch(act->initj->equipement[EQUIPMNT_MAIN_D]->objet_type)
+									{
+										case OBJ_MITRAILLETTE:
+											balle_prise=1+genrand_int32()%(nbballe);
+											nbballe-=balle_prise;
+											// CALCUL DES DEGATS
+											calcappliq_degat_obstacle(act->initj,NULL,mb,balle_prise);
+											printf("obstacle chemin %d",mb->vie);
+											// Gestion des explosions et de l acide.
+											 if(mb->vie<=0 && mb->acteur_type==ACTEUR_BOUTEILLE_GAZ)
+											 {
+											 	 	ajouter_mess_console("La bouteille de gaz explose.",al_map_rgb(0,0,255));
+												  	if(detruire_bouteille_gaz(monde[carte_active],mb,act->initj)==1)return 2;
+												    vider_champ_vision_carte(monde[carte_active]);
+													calcul_champ_vision();
+									  	
+											 }
+											 else if(mb->vie<=0 && mb->acteur_type==ACTEUR_CONTENEUR_ACIDE)
+											 {
+											 	    ajouter_mess_console("Le conteneur en acide est eventre par vos munitions. De l'acide sulfurique se repand sur le sol.",al_map_rgb(0,0,255));
+											 	  	detruire_conteneur_acide(monde[carte_active],mb);
+												   	vider_champ_vision_carte(monde[carte_active]);
+													calcul_champ_vision();
+									  	
+											 }
+													
+											// SI TOUTES LES BALLES ONT ETE ARRETES
+											if(nbballe<=0)
+											{
+												ajouter_mess_console("Vous arrachez la moitie du mobilier avec votre rafale!", al_map_rgb(255,255,255));
+											return 0;
+											}
+											else //SI QUELQUES BALLES SONT ARRETEE
+											{
+												ajouter_mess_console("Le mobilier stoppe net une partie de vos balles, ils ne doivent pas etre de marque ichiea!", al_map_rgb(255,255,255));	
+											}
+										break;
+										//
+										case OBJ_FUSIL_POMPE:
+											calcappliq_degat_obstacle(act->initj,NULL,mb,1);
+											ajouter_mess_console("La charge de chevrotine est stoppee par du mobilier", al_map_rgb(255,255,255));		
+											// Gestion des explosions et de l acide.
+											 if(mb->vie<=0 && mb->acteur_type==ACTEUR_BOUTEILLE_GAZ)
+											 {
+											 	 	ajouter_mess_console("La bouteille de gaz explose.",al_map_rgb(0,0,255));
+												  	if(detruire_bouteille_gaz(monde[carte_active],mb,act->initj)==1)return 2;
+												    vider_champ_vision_carte(monde[carte_active]);
+													calcul_champ_vision();
+									  			
+											 }
+											 else if(mb->vie<=0 && mb->acteur_type==ACTEUR_CONTENEUR_ACIDE)
+											 {
+											 	    ajouter_mess_console("Le conteneur en acide est eventre par vos munitions. De l'acide sulfurique se repand sur le sol.",al_map_rgb(0,0,255));
+													detruire_conteneur_acide(monde[carte_active],mb);
+												  	vider_champ_vision_carte(monde[carte_active]);
+													calcul_champ_vision();
+									  	
+											 }
+											
+											return 0;
+										break;
+										//
+										case OBJ_PISTOLET:
+										   	calcappliq_degat_obstacle(act->initj,NULL,mb,1);
+											ajouter_mess_console("La balle se loge dans le mobilier.", al_map_rgb(255,255,255));	
+											// Gestion des explosions et de l acide.
+											 if(mb->vie<=0 && mb->acteur_type==ACTEUR_BOUTEILLE_GAZ)
+											 {
+											 	 	ajouter_mess_console("La bouteille de gaz explose.",al_map_rgb(0,0,255));
+													if(detruire_bouteille_gaz(monde[carte_active],mb,act->initj)==1)return 2;
+												  	vider_champ_vision_carte(monde[carte_active]);
+													calcul_champ_vision();
+									  			  
+												
+											 }
+											 else if(mb->vie<=0 && mb->acteur_type==ACTEUR_BOUTEILLE_GAZ)
+											 {
+											 	    ajouter_mess_console("Le conteneur en acide est eventre par vos munitions. De l'acide sulfurique se repand sur le sol.",al_map_rgb(0,0,255));
+													detruire_conteneur_acide(monde[carte_active],mb);
+												 	vider_champ_vision_carte(monde[carte_active]);
+													calcul_champ_vision();
+									  	
+											 }
+											
+											return 0;
+										break;
+										//
+									}
+									
+									
+								}
+							}
+							
+							/**********************************************
+							*** FIN DE GESTION DES INTER AVEC LES ACTEURS*/
+												
+							e2=2*err;
+								if(e2>-dy)
+								{
+									err-=dy;
+									x+=signx;
+								}
+							
+							if(x==x2 && y==y2)
+							{
+								//ope sur position;
+							break;
+							}
+							if(e2<dx)
+							{
+								err+=dx;
+								y+=signy;
+							}
+								
+							
+						}
+				///////////////
+			
+			/******************************************************************
+			***********CALCUL DES EVENTUELS DEGATS SUR LA CIBLE EVENTUELLE****************
+			******************************************************************/
+							
+							/************************************************
+							**********GESTION DES INTERACTION AVEC LES TILES*/
+								if(interaction_balle_tile(NULL, act->initj,x, y)==1)return 0;
+							/************************************************
+							*******FIN DE GESTION DES INTER AC LES TILES ***/
+							
+			ac=obtenir_ennemi(monde[carte_active],x,y);
+			mb=obtenir_mobilier(monde[carte_active],x, y);
+			printf("obtenir ennemi %d x %d, y %d\n",obtenir_ennemi(monde[carte_active],x,y),x,y);
+			if(ac!=NULL)  // GESTION DE LA CIBLE EVENTUELLE
+			{
+				printf("Cible ennemi trouvee \n");
+			     if(calcul_cible_atteinte(act->initj,NULL,ac))
+			     {
+			     	
+			     	///////////////////////////////////
+			     	///////GESTION DES COUPS CRITIQUES
+			     	            critique=genrand_int32()%1001; //tirage proba coup critique							
+								if(act->initj->maudit)
+								{
+								  if(critique >=920)coup_critique=-1;
+								  if(critique<=act->initj->coup_critique*5)coup_critique=1;
+								  	
+								}
+								else if(act->initj->tireur_sang_froid)// pas d echec critique 
+								{
+									if(critique<=act->initj->coup_critique)coup_critique=1;
+									
+								}
+								else 
+								{	
+									// ECHEC CRITIQUE -> FORMULE  1000-100/dexterite au pire 10% de chance de foirer. Au mieux 0.5%
+								
+									if(critique>= 1000-100/act->initj->dexterite)coup_critique=-1;
+									if(critique<=act->initj->coup_critique)coup_critique=1;
+								}
+				 	////////FIN GESTION DES COUPS CRITIQUES
+				 	///////////////////////////////////////
+				 	
+				 	degat=nbballe*act->initj->equipement[EQUIPMNT_MAIN_D]->degat;
+				 	
+				 	// Gestion tireur sang froid
+					 if(act->initj->tireur_sang_froid)
+				 	{
+				 		degat*=4/3;
+				 	}
+				 	
+				 	// CALCUL DES DEGATS 
+				 	switch(coup_critique)
+				 	{
+				 		/***************************************************************************************/
+				 		case 1:
+									//Message coup_critique, vous passez au travers des defenses de l'ennemi.
+
+									// diminution de la vie du PNJ
+									ac->vie-=degat*4/3;
+									
+									// CALCUL DE L AJOUT D ADRENALINE
+									if(ac->vie<=0) mort=true;
+									 ajout_adrenaline(act->initj,0,degat*4/3,mort);
+									
+									if(mort)
+									{
+									 sprintf(message,"Coup Critique, vous passez a travers les defenses de l'ennemi, le tuant sur le coup! Dgt:%d",degat*4/3) ;
+									 ajout_score_mort_monstre(act->initj,ac);
+									}
+									else
+									{
+									 sprintf(message,"Coup Critique, vous passez a travers les defenses de l'ennemi. Dgt:%d",degat*4/3);
+									}
+									
+									ajouter_mess_console(message,al_map_rgb(255,0,0));
+									// Gestion de la degradation des armes
+								 	if(degradation_equip_arme(act->initj)==1)
+								  	{
+								  		ajouter_mess_console("Usee par de nombreux usages, votre arme rend l'ame.",al_map_rgb(0,0,255));
+								  	}
+									break;
+						/*************************************************************************************/			
+						case 0:
+									
+									
+									protection=calcul_protec(ac);
+									//Diminition de la vie du PNJ. Limitation de degat grace aux protection.
+									ac->vie-=(degat*(100-protection))/100;
+									
+									//degradation des equipements de protection/
+									degradation_equip_protec(ac);
+						
+									// CALCUL DE L AJOUT D ADRENALINE
+									if(ac->vie<=0) mort=true;
+									 ajout_adrenaline(act->initj,0,(degat*(100-protection))/100,mort);
+									 if(mort)
+									 {
+									  sprintf(message,"Vous frappez l'ennemi, votre coup lui ecrase la tete. Avec la puree qu'il a entre les oreilles, les seuls mouvements dont il est capable sont nerveux Dgt:%d",(degat*(100-protection))/100) ;
+									 ajout_score_mort_monstre(act->initj,ac);// Calcul du nouveau score du joueur
+									  
+									 }
+									 else 
+									 {
+									 	sprintf(message,"Vous tapez de toutes vos forces sur l'ennemi. Dgt:%d",degat*4/3);
+									 
+									 }
+									 ajouter_mess_console(message,al_map_rgb(255,0,0));
+									 
+								 //GESTION DE LA DEGRADATION DES ARMES
+								  	if(degradation_equip_arme(act->initj)==1)
+								  	{
+								  		ajouter_mess_console("Usee par de nombreux usages, votre arme rend l'ame.",al_map_rgb(0,0,255));
+								  	}
+									break;
+						/***********************************************************************************/			
+						case -1:
+									
+								    if(act->initj->equipement[EQUIPMNT_MAIN_D]!=NULL)
+									{
+										faire_saigner(act->initj);
+										delete act->initj->equipement[EQUIPMNT_MAIN_D];
+										act->initj->equipement[EQUIPMNT_MAIN_D]=NULL;
+										ajouter_mess_console("Echec critique, l'arme se desintegre dans votre main!",al_map_rgb(0,0,255));
+									}	 
+									// AJOUT DE L ADRENALINE
+									 ajout_adrenaline(act->initj,10,0,0);
+									break;
+				 		/***********************************************************************************/
+				 		
+				 	}
+				 	 
+				 return 1;	
+			     }
+			}
+			else if(mb!=NULL ) //GESTION DU MOBILIER EVENTUEL
+			{
+		 		 if(calcul_cible_atteinte(act->initj,NULL,mb))
+			     {
+				     	if(mb->acteur_type==ACTEUR_BOUTEILLE_GAZ || mb->acteur_type==ACTEUR_CONTENEUR_ACIDE)
+						{
+					
+						 ///////////////////////////////////
+			     	    ///////GESTION DES COUPS CRITIQUES
+			     	            critique=genrand_int32()%1001; //tirage proba coup critique							
+								if(act->initj->maudit)
+								{
+								  if(critique >=920)coup_critique=-1;
+								  if(critique<=act->initj->coup_critique*5)coup_critique=1;
+								  	
+								}
+								else if(act->initj->tireur_sang_froid)// pas d echec critique 
+								{
+									if(critique<=act->initj->coup_critique)coup_critique=1;
+									
+								}
+								else 
+								{	
+									// ECHEC CRITIQUE -> FORMULE  1000-100/dexterite au pire 10% de chance de foirer. Au mieux 0.5%
+								
+									if(critique>= 1000-100/act->initj->dexterite)coup_critique=-1;
+									if(critique<=act->initj->coup_critique)coup_critique=1;
+								}
+							 	////////FIN GESTION DES COUPS CRITIQUES
+							 	///////////////////////////////////////
+							 	
+							 		
+							 	degat=nbballe*act->initj->equipement[EQUIPMNT_MAIN_D]->degat;
+							 	
+							 	// Gestion tireur sang froid
+								 if(act->initj->tireur_sang_froid)
+							 	{
+							 		degat*=4/3;
+							 	}
+				 	
+				 	
+							 	// CALCUL DES DEGATS 
+							 	switch(coup_critique)
+							 	{
+							 		/***************************************************************************************/
+							 		case 1:
+												//Message coup_critique, vous passez au travers des defenses de l'ennemi.
+			
+												// degat pour coup critique
+												degat=degat*4/3;
+									/*************************************************************************************/			
+									case 0:
+												
+												mb->vie-=(degat);
+									
+												// CALCUL DE L AJOUT D ADRENALINE
+												if(mb->vie<=0) mort=true;
+											//	 ajout_adrenaline(act->initj,0,(degat*(100-protection))/100,mort);
+												 if(mort)
+												 {
+												      if(mb->acteur_type==ACTEUR_BOUTEILLE_GAZ)
+												      {
+												      	ajouter_mess_console("La bouteille de gaz explose.",al_map_rgb(0,0,255));
+														if(detruire_bouteille_gaz(monde[carte_active],mb,act->initj)==1)return 2;
+												  		vider_champ_vision_carte(monde[carte_active]);
+														calcul_champ_vision();
+									  		  
+												      }
+												      else if(mb->acteur_type==ACTEUR_CONTENEUR_ACIDE)
+												      {
+												      	ajouter_mess_console("Le conteneur en acide est eventre par vos munitions. De l'acide sulfurique se repand sur le sol.",al_map_rgb(0,0,255));
+												        detruire_conteneur_acide(monde[carte_active],mb);
+												      	vider_champ_vision_carte(monde[carte_active]);
+														calcul_champ_vision();
+									  	
+													  }
+												 }
+												 else
+												 {
+												 	
+												 }
+												
+											 //GESTION DE LA DEGRADATION DES ARMES
+											  	if(degradation_equip_arme(act->initj)==1)
+											  	{
+											  		ajouter_mess_console("Usee par de nombreux usages, votre arme rend l'ame.",al_map_rgb(0,0,255));
+											  	}
+												break;
+									/***********************************************************************************/			
+									case -1:
+												
+											    if(act->initj->equipement[EQUIPMNT_MAIN_D]!=NULL)
+												{
+													delete act->initj->equipement[EQUIPMNT_MAIN_D];
+													act->initj->equipement[EQUIPMNT_MAIN_D]=NULL;
+													ajouter_mess_console("Echec critique, l'arme se desintegre dans votre main!",al_map_rgb(0,0,255));
+												}	 
+												// AJOUT DE L ADRENALINE
+												 ajout_adrenaline(act->initj,10,0,0);
+												break;
+							 		/***********************************************************************************/
+							 		
+							 	}
+							 	//fin de calcul des degats
+				 				
+					    }
+					    else// GESTION DU MOBILIER DIFFERENT DE LA BOUTEILLE DE GAZ ET DU CONTENEUR D ACIDE
+					    {
+					    ajouter_mess_console("Vos munitions s'ecrasent contre le mobilier.",al_map_rgb(0,0,255));								 
+					    }
+			     
+			     	return 1;
+			 	}
+			 	
+			 	
+			}
+			
+			
+			/*****************************************************************
+			*************FIN DE CALCUL DE DEGAT******************
+			*****************************************************************/
+			
+			/*******************************************************************
+			**** CALCUL DU RESTE DE LA TRAJECTION SI LA BALLE N A RIEN TOUCHE**/
+			x=(x2-x1)*100;
+			y=(y2-y1)*100;
+			
+			y1=y2;
+			x1=x2;
+			y2+=y;
+			x2+=x;
+			x=x1;
+			y=y1;
+			/*******************************/
+			 
+			 dx=abs(x2-x1);
+			 dy=abs(y2-y1);
+			 err=dx-dy;
+			 
+			//deplacement de une case
+			e2=2*err;
+			if(e2>-dy)
+			{
+				err-=dy;
+				x+=signx;
+			}
+			if(e2<dx)
+			{
+				err+=dx;
+				y+=signy;
+			}
+			///////////////////////					
+			
+			//Algo de ligne
+						while(1)
+						{
+ 
+							//ope sur position x;y si on arrive sur la cible break
+							if(x==x2 && y==y2)break;
+							
+							
+							/************************************************
+							**********GESTION DES INTERACTION AVEC LES TILES*/
+							if(interaction_balle_tile(NULL, act->initj,x, y)==1)return 0;
+ 
+						
+							/***********************************************
+							******GESTION DES INTERACTIONS AVEC LES ACTEURS ***
+							***********************************************/
+							ac=obtenir_ennemi(monde[carte_active],x,y);
+							mb=obtenir_mobilier(monde[carte_active],x, y);
+							if(ac!=NULL)// SI ENNEMI SURLE CHEMIN
+							{
+							
+								if( proba_toucher_pnj_non_cible(x,y,act->initj )){// SI L'ACTEUR EST TOUCHE
+									
+									//Calcul du nombre de balle arreté
+									switch(act->initj->equipement[EQUIPMNT_MAIN_D]->objet_type)
+									{
+										case OBJ_MITRAILLETTE:
+											balle_prise=1+genrand_int32()%(nbballe);
+											nbballe-=balle_prise;
+											// CALCUL DES DEGATS
+											calcappliq_degat_obstacle(act->initj,NULL,ac,balle_prise);
+											
+											// SI TOUTES LES BALLES ONT ETE ARRETES
+											if(nbballe<=0)
+											{
+											ajouter_mess_console("Un dommage collateral stoppe les balles avec sa tete.", al_map_rgb(255,0,0));	
+											return 2;
+											}
+											else //SI QUELQUES BALLES SONT ARRETEE
+											{
+											ajouter_mess_console("Une partie des balles est stoppee par un corps qui passait par la! Pas de chance...", al_map_rgb(255,0,0));	
+											}
+										break;
+										//
+										case OBJ_FUSIL_POMPE:
+											calcappliq_degat_obstacle(act->initj,NULL,ac,1);
+										    ajouter_mess_console("Vous offrez un lifting gratuit a la chevrotine au pauvre here qui passait par la!", al_map_rgb(255,0,0));
+											return 0;
+										break;
+										//
+										case OBJ_PISTOLET:
+										   	calcappliq_degat_obstacle(act->initj,NULL,ac,1);
+											ajouter_mess_console("La balle s'integre parfaitement dans le corps de la chose qui passait par la!", al_map_rgb(255,0,0));
+											return 0;
+										break;
+										//
+									}
+									
+								}
+							}
+							else if(mb!=NULL) // SI MOBILIER SUR LE CHEMIN
+							{
+								printf("toto");
+								
+								if(proba_toucher_obstacle(x1,y1,x2,y2,x,y,proba,3,4)){
+									
+									//Calcul du nombre de balle arreté
+									switch(act->initj->equipement[EQUIPMNT_MAIN_D]->objet_type)
+									{
+										case OBJ_MITRAILLETTE:
+											balle_prise=1+genrand_int32()%(nbballe);
+											nbballe-=balle_prise;
+											// CALCUL DES DEGATS
+											calcappliq_degat_obstacle(act->initj,NULL,mb,balle_prise);
+											printf("obstacle chemin %d",mb->vie);
+											// Gestion des explosions et de l acide.
+											 if(mb->vie<=0 && mb->acteur_type==ACTEUR_BOUTEILLE_GAZ)
+											 {
+											 	 	ajouter_mess_console("La bouteille de gaz explose.",al_map_rgb(0,0,255));
+												    if(detruire_bouteille_gaz(monde[carte_active],mb,act->initj)==1)return 2;
+												  	vider_champ_vision_carte(monde[carte_active]);
+													calcul_champ_vision();
+									  	
+											 }
+											 else if(mb->vie<=0 && mb->acteur_type==ACTEUR_CONTENEUR_ACIDE)
+											 {
+											 	 	ajouter_mess_console("Le conteneur en acide est eventre par vos munitions. De l'acide sulfurique se repand sur le sol.",al_map_rgb(0,0,255));
+											 		detruire_conteneur_acide(monde[carte_active],mb);
+												    vider_champ_vision_carte(monde[carte_active]);
+													calcul_champ_vision();
+									  	
+											 }
+													
+											// SI TOUTES LES BALLES ONT ETE ARRETES
+											if(nbballe<=0)
+											{
+												ajouter_mess_console("Vous arrachez la moitie du mobilier avec votre rafale!", al_map_rgb(255,255,255));
+											return 2;
+											}
+											else //SI QUELQUES BALLES SONT ARRETEE
+											{
+												ajouter_mess_console("Le mobilier stoppe net une partie de vos balles, ils ne doivent pas etre de marque ichiea!", al_map_rgb(255,255,255));	
+											}
+										break;
+										//
+										case OBJ_FUSIL_POMPE:
+											calcappliq_degat_obstacle(act->initj,NULL,mb,1);
+											ajouter_mess_console("La charge de chevrotine est stoppee par du mobilier", al_map_rgb(255,255,255));		
+											// Gestion des explosions et de l acide.
+											 if(mb->vie<=0 && mb->acteur_type==ACTEUR_BOUTEILLE_GAZ)
+											 {
+											 	 	ajouter_mess_console("La bouteille de gaz explose.",al_map_rgb(0,0,255));
+												    if(detruire_bouteille_gaz(monde[carte_active],mb,act->initj)==1)return 2;
+												  	vider_champ_vision_carte(monde[carte_active]);
+													calcul_champ_vision();
+									  			
+											 }
+											 else if(mb->vie<=0 && mb->acteur_type==ACTEUR_CONTENEUR_ACIDE)
+											 {
+											 	 	ajouter_mess_console("Le conteneur en acide est eventre par vos munitions. De l'acide sulfurique se repand sur le sol.",al_map_rgb(0,0,255));
+													detruire_conteneur_acide(monde[carte_active],mb);
+												    vider_champ_vision_carte(monde[carte_active]);
+													calcul_champ_vision();
+									  	
+											 }
+											
+											return 0;
+										break;
+										//
+										case OBJ_PISTOLET:
+										   	calcappliq_degat_obstacle(act->initj,NULL,mb,1);
+											ajouter_mess_console("La balle se loge dans le mobilier.", al_map_rgb(255,255,255));	
+											// Gestion des explosions et de l acide.
+											 if(mb->vie<=0 && mb->acteur_type==ACTEUR_BOUTEILLE_GAZ)
+											 {
+											 	 	ajouter_mess_console("La bouteille de gaz explose.",al_map_rgb(0,0,255));
+													if(detruire_bouteille_gaz(monde[carte_active],mb,act->initj)==1)return 2;
+												  	vider_champ_vision_carte(monde[carte_active]);
+													calcul_champ_vision();
+									  			  
+												
+											 }
+											 else if(mb->vie<=0 && mb->acteur_type==ACTEUR_CONTENEUR_ACIDE)
+											 {
+											 	 	ajouter_mess_console("Le conteneur en acide est eventre par vos munitions. De l'acide sulfurique se repand sur le sol.",al_map_rgb(0,0,255));
+													detruire_conteneur_acide(monde[carte_active],mb);
+												    vider_champ_vision_carte(monde[carte_active]);
+													calcul_champ_vision();
+									  	
+											 }
+											
+											return 0;
+										break;
+										//
+									}
+									
+									
+								}
+							}
+							
+							/**********************************************
+							*** FIN DE GESTION DES INTER AVEC LES ACTEURS*/
+												
+							e2=2*err;
+								if(e2>-dy)
+								{
+									err-=dy;
+									x+=signx;
+								}
+							
+							if(x==x2 && y==y2)
+							{
+								//ope sur position;
+							break;
+							}
+							if(e2<dx)
+							{
+								err+=dx;
+								y+=signy;
+							}
+								
+							
+						}
+				///////////////	
+		   	
+		   }
 		
 		}
+		/***********************************************************************************
+		***********************************************************************************/
 	}
 	else if(act->initc!=NULL)
 	{
@@ -1937,11 +3561,13 @@ int moteur_jeu::execute_action_rechargement(action *act)
 	ac[nouv].bool2=sol;
 
 	*/
-	
+			ajouter_mess_console("Vous rechargez votre arme.", al_map_rgb(255,255,255));
+							
 	int emplamuni;
 	bool sac;
 	if(act->initj!=NULL)
 	{
+		
 				emplamuni=indice_munition_de_arme(act->initj,act->nb1,act->bool1, &sac );
 						
 				if(act->bool1)
@@ -2108,7 +3734,7 @@ int moteur_jeu::execute_action_utilisation_medic(action *act)
 				if(	act->initc->equipement[act->nb1]->stop_sang)
 				{
 					act->initc->hemorragie=false;
-					act->initc->hemorragie_tic=0;
+					act->initc->tic_hemorragie=0;
 				}
 			 	
 			 	delete act->initc->equipement[act->nb1];
@@ -2389,7 +4015,39 @@ int moteur_jeu::execute_action_modif_corpo(action *act)
 //////////////
 int moteur_jeu::execute_action_ouvrir_fermer_porte(action *act)
 {
-	
+	if(act->initj!=NULL)
+	{
+		
+		if(monde[carte_active]->cle_acquise)
+		{
+			//monde[carte_active]->donnee_carte[act->initj->y+act->y][act->initj->x+act->x].verrouille=false;
+			//monde[carte_active]->donnee_carte[act->initj->y+act->y][act->initj->x+act->x].ferme=!monde[carte_active]->donnee_carte[act->initj->y+act->y][act->initj->x+act->x].ferme;	
+		    ouvrir_fermer_porte(&monde[carte_active]->donnee_carte[act->initj->y+act->y][act->initj->x+act->x]);
+			
+		}
+		else
+		{
+			
+			if(	monde[carte_active]->donnee_carte[act->initj->y+act->y][act->initj->x+act->x].verrouille==true)
+			{
+				  ajouter_mess_console("La porte est ferme a cle.",al_map_rgb(255,255,255));	
+			return 0;
+			}
+			else
+			ouvrir_fermer_porte(&monde[carte_active]->donnee_carte[act->initj->y+act->y][act->initj->x+act->x]);
+			  //monde[carte_active]->donnee_carte[act->initj->y+act->y][act->initj->x+act->x].ferme=!monde[carte_active]->donnee_carte[act->initj->y+act->y][act->initj->x+act->x].ferme;				
+			
+		}
+		    ajouter_mess_console("Vous ouvrez la porte.",al_map_rgb(255,255,255));
+			vider_champ_vision_carte(monde[carte_active]);
+			calcul_champ_vision();
+	}
+	else if(act->initc!=NULL)
+	{
+		
+		
+		
+	}
 	return 0;
 }		
 
@@ -2403,6 +4061,216 @@ int moteur_jeu::execute_action_ouvrir_fermer_porte(action *act)
 // ********************FONCTION UTILE POUR LA GESTION DES COMBATS *****
 // ************************************************************
 
+
+int moteur_jeu::interaction_balle_tile(acteur *act, joueur *jr, int x, int y)
+{
+	if(jr!=NULL)
+	{
+	
+							/************************************************
+							**********GESTION DES INTERACTION AVEC LES TILES*/
+							if(monde[carte_active]->donnee_carte[y][x].bloquant)
+							{
+								
+								if(monde[carte_active]->donnee_carte[y][x].type==TILE_BARREAUX)
+								{
+								 //Barreaux -> la balle traverse	
+								}
+								else if(monde[carte_active]->donnee_carte[y][x].type==TILE_VITRE)// DESTRUCTION PANNEAU VERRES PAR BALLES
+								{
+									if(jr->equipement[EQUIPMNT_MAIN_D]->objet_type==OBJ_MITRAILLETTE)
+									ajouter_mess_console("Le panneau de verre est traverse par les munitions. Il s'affaisse et eclate en de milliers de morceaux.", al_map_rgb(255,255,255));
+									else 
+									ajouter_mess_console("La munition brise le panneau de verre.", al_map_rgb(255,255,255));
+									
+									placer_tile(&monde[carte_active]->donnee_carte[y][x],TILE_SOL_VERRE);
+									vider_champ_vision_carte(monde[carte_active]);
+									calcul_champ_vision();	
+								}
+								else if(monde[carte_active]->donnee_carte[y][x].type==TILE_PORTE_FRAGILE)//DESTRUCTION DE LA PORTE FRAGILE PAR BALLES
+								{
+									
+									if(jr->equipement[EQUIPMNT_MAIN_D]->objet_type==OBJ_MITRAILLETTE )
+									{
+										if(genrand_int32()%101<95){
+										
+											ajouter_mess_console("Le frele panneau de bois de la porte est reduis en sciure pour vos balles.", al_map_rgb(255,255,255));
+											placer_tile(&monde[carte_active]->donnee_carte[y][x],TILE_SOL);
+											vider_champ_vision_carte(monde[carte_active]);
+											calcul_champ_vision();
+										}
+										else
+										{
+											ajouter_mess_console("La porte stoppe toutes vos munitions", al_map_rgb(255,255,255));
+											return 1;
+										}
+									}
+									else
+									{ 
+										 if(genrand_int32()%101<70){
+										 
+											ajouter_mess_console("Le panneau de bois s'ouvre en deux sous l'impact de la balle.", al_map_rgb(255,255,255));
+											
+											placer_tile(&monde[carte_active]->donnee_carte[y][x],TILE_SOL_VERRE);
+											vider_champ_vision_carte(monde[carte_active]);
+											calcul_champ_vision();
+										}
+										else
+										{
+											ajouter_mess_console("La porte arrete votre munition...", al_map_rgb(255,255,255));
+											return 1;
+										}
+									}
+								}else if(monde[carte_active]->donnee_carte[y][x].type==TILE_PORTE_NORMALE)//DESTRUCTION DE LA PORTE NORMALE PAR BALLES
+								{
+									
+									if(jr->equipement[EQUIPMNT_MAIN_D]->objet_type==OBJ_MITRAILLETTE )
+									{
+										if(genrand_int32()%101<65){
+										
+											ajouter_mess_console("Le frele panneau de bois de la porte est reduis en sciure pour vos balles.", al_map_rgb(255,255,255));
+											placer_tile(&monde[carte_active]->donnee_carte[y][x],TILE_SOL);
+											vider_champ_vision_carte(monde[carte_active]);
+											calcul_champ_vision();
+										}
+										else
+										{
+											ajouter_mess_console("La porte stoppe toutes vos munitions", al_map_rgb(255,255,255));
+											return 1;
+										}
+									}
+									else
+									{ 
+										 if(genrand_int32()%101<45){
+										 
+											ajouter_mess_console("Le panneau de bois s'ouvre en deux sous l'impact de la balle.", al_map_rgb(255,255,255));
+											
+											placer_tile(&monde[carte_active]->donnee_carte[y][x],TILE_SOL_VERRE);
+											vider_champ_vision_carte(monde[carte_active]);
+											calcul_champ_vision();
+										}
+										else
+										{
+											ajouter_mess_console("La porte arrete votre munition...", al_map_rgb(255,255,255));
+											return 1;
+										}
+									}
+								}
+								else 
+								{		
+									/***************************************************************
+									*************GESTION DES TILES BLOQUANT ET INCASSABLE **********
+									***************************************************************/	
+								     if(jr->equipement[EQUIPMNT_MAIN_D]->objet_type==OBJ_MITRAILLETTE)
+									ajouter_mess_console("Les balles s'ecrasent avec fracas contre la paroi.", al_map_rgb(255,255,255));
+									else 
+									ajouter_mess_console("La munition se desintegre contre la paroi.", al_map_rgb(255,255,255));
+								
+									return 1;
+								}
+							}
+							/************************************************
+							*******FIN DE GESTION DES INTER AC LES TILES ***/
+		
+	}
+	else if(act!=NULL)
+	{
+							/************************************************
+							**********GESTION DES INTERACTION AVEC LES TILES*/
+							if(monde[carte_active]->donnee_carte[y][x].bloquant)
+							{
+								
+								if(monde[carte_active]->donnee_carte[y][x].type==TILE_BARREAUX)
+								{
+								 //Barreaux -> la balle traverse	
+								}
+								else if(monde[carte_active]->donnee_carte[y][x].type==TILE_VITRE)// DESTRUCTION PANNEAU VERRES PAR BALLES
+								{
+									
+									placer_tile(&monde[carte_active]->donnee_carte[y][x],TILE_SOL_VERRE);
+									vider_champ_vision_carte(monde[carte_active]);
+									calcul_champ_vision();	
+								}
+								else if(monde[carte_active]->donnee_carte[y][x].type==TILE_PORTE_FRAGILE)//DESTRUCTION DE LA PORTE FRAGILE PAR BALLES
+								{
+									
+									if(act->equipement[EQUIPMNT_MAIN_D]->objet_type==OBJ_MITRAILLETTE )
+									{
+										if(genrand_int32()%101<95){
+										
+									
+											placer_tile(&monde[carte_active]->donnee_carte[y][x],TILE_SOL);
+											vider_champ_vision_carte(monde[carte_active]);
+											calcul_champ_vision();
+										}
+										else
+										{										
+											return 1;
+										}
+									}
+									else
+									{ 
+										 if(genrand_int32()%101<70){
+										 											
+											placer_tile(&monde[carte_active]->donnee_carte[y][x],TILE_SOL_VERRE);
+											vider_champ_vision_carte(monde[carte_active]);
+											calcul_champ_vision();
+										}
+										else
+										{
+											return 1;
+										}
+									}
+								}else if(monde[carte_active]->donnee_carte[y][x].type==TILE_PORTE_NORMALE)//DESTRUCTION DE LA PORTE NORMALE PAR BALLES
+								{
+									
+									if(act->equipement[EQUIPMNT_MAIN_D]->objet_type==OBJ_MITRAILLETTE )
+									{
+										if(genrand_int32()%101<65){
+										
+											placer_tile(&monde[carte_active]->donnee_carte[y][x],TILE_SOL);
+											vider_champ_vision_carte(monde[carte_active]);
+											calcul_champ_vision();
+										}
+										else
+										{
+										
+											return 1;
+										}
+									}
+									else
+									{ 
+										 if(genrand_int32()%101<45){
+										 
+											
+											placer_tile(&monde[carte_active]->donnee_carte[y][x],TILE_SOL_VERRE);
+											vider_champ_vision_carte(monde[carte_active]);
+											calcul_champ_vision();
+										}
+										else
+										{
+											return 1;
+										}
+									}
+								}
+								else 
+								{		
+									/***************************************************************
+									*************GESTION DES TILES BLOQUANT ET INCASSABLE **********
+									***************************************************************/	
+									return 1;
+								}
+							}
+							/************************************************
+							*******FIN DE GESTION DES INTER AC LES TILES ***/
+
+		
+	}
+	return 0;
+}
+
+
+
 // proba_toucher_obstacle
 // Fonction pour calculer la probabilité de toucher un obstacle
 // entre le tireur et la cible.
@@ -2414,19 +4282,268 @@ int moteur_jeu::execute_action_ouvrir_fermer_porte(action *act)
 bool moteur_jeu::proba_toucher_obstacle(int x1,int y1,int x2,int y2,int x,int y,int prctage,int pctage_proche,int dist_reduit)
 {
 	
-	int distance=abs(x2-x1)*abs(y2-y1);
-	
-	if(distance<=dist_reduit*dist_reduit)
+	int distance=int(sqrt(double((x-x1)*(x-x1)+(y-y1)*(y-y1))));
+	printf("\n distance  %d\n",distance,dist_reduit);
+	if(distance<=dist_reduit)
 	{
 		if(genrand_int32()%101<pctage_proche)return true;
 		return false;
 	}	
 	
-	if(genrand_int32()%101<(distance-(abs(x-x2)*abs(x-y2)))*prctage/(distance))return true;
+	printf("\n prctage  %d",prctage-prctage/(distance/3+1));
+	
+	if(genrand_int32()%101<prctage-prctage/(distance/3+1))return true;
 	
 	return false;
 }		
 
+
+//static bool proba_toucher_obstacle_direction(int xtireur,ytireur, int x, int y, joueur *jr);
+//
+// Fonction pour calculer la probabilite de toucher un obstacle lorsque
+// l'on décide de tirer dans une direction donnee. 
+bool moteur_jeu::proba_toucher_obstacle_tdirection( int x, int y, joueur *jr)
+{
+	
+	int distance=int(sqrt(double((x-jr->x)*(x-jr->x)+(y-jr->y)*(y-jr->y))));
+	printf("\n distance  %d %d\n",distance,100*jr->dexterite/(19*distance));
+
+	if(genrand_int32()%101<100*jr->dexterite/(17*distance))return true;
+	
+	return false;
+	
+}
+//version pnj
+bool moteur_jeu::proba_toucher_obstacle_tdirection( int x, int y, acteur *act)
+{
+	
+	int distance=int(sqrt(double((x-act->x)*(x-act->x)+(y-act->y)*(y-act->y))));
+	printf("\n distance  %d %d\n",distance,100*act->dxtrt/(19*distance));
+
+	if(genrand_int32()%101<100*act->dxtrt/(17*distance))return true;
+	
+	return false;
+	
+}
+
+
+//fonction pour savoir si un pnj sur le chemin de la balle, la prend 
+// dans la mouille
+bool moteur_jeu::proba_toucher_pnj_non_cible(int x, int y, joueur *jr )
+{
+	
+		int distance=int(sqrt(double((x-jr->x)*(x-jr->x)+(y-jr->y)*(y-jr->y))));
+		printf("\n distance  %d %d\n",distance,100*jr->dexterite/(17*distance));
+
+	if(genrand_int32()%101<100*jr->dexterite/(17*distance))return true;
+	
+	return false;
+}
+//version pnj
+bool moteur_jeu::proba_toucher_pnj_non_cible(int x, int y, acteur *act )
+{
+	
+		int distance=int(sqrt(double((x-act->x)*(x-act->x)+(y-act->y)*(y-act->y))));
+		printf("\n distance  %d %d\n",distance,100*act->dxtrt/(17*distance));
+
+	if(genrand_int32()%101<100*act->dxtrt/(17*distance))return true;
+	
+	return false;
+}
+
+
+// Fonction pour calculer et appliquer des dégats en fonction de la position d'un obstacle
+// Différent de degat cible car on considere deja que l'obstacle a été touché
+// grace a la fonction proba toucher obstacle
+int moteur_jeu::calcappliq_degat_obstacle(joueur *jr,acteur *act,acteur *cible,int nbballe)
+{
+ 	int	degat=0;
+ 	int protection=0;
+	if(jr!=NULL && act==NULL) // Si c'est le joueur qui tire
+	{
+			
+			degat+=nbballe*jr->equipement[EQUIPMNT_MAIN_D]->degat;
+			
+			degat=1+genrand_int32()%(degat/3);// Calcul du nombre de dégat que prend l'acteur
+			
+			
+			if(cible->acteur_type>=ACTEUR_LIT)// GESTION DES PERSONNAGES
+			{
+			
+			protection=calcul_protec(cible);
+			//Diminition de la vie du PNJ. Limitation de degat grace aux protection.
+			cible->vie-=(degat*(100-protection))/100;
+									
+			//degradation des equipements de protection/
+			degradation_equip_protec(cible);
+			}
+			else
+			cible->vie-=degat;
+			
+			
+			return degat;
+	}
+	else// Sinon c'est act qui tire
+	{
+			
+					degat+=nbballe*jr->equipement[EQUIPMNT_MAIN_D]->degat;
+			
+					degat=1+genrand_int32()%(degat/3);// Calcul du nombre de dégat que prend l'acteur
+			
+					cible->vie-=degat;
+			
+
+			if(jr==NULL)//Si le joueur n'est pas la cible
+			{
+				if(cible->acteur_type>=ACTEUR_LIT)// GESTION DES PERSONNAGES
+				{
+				
+				protection=calcul_protec(cible);
+				//Diminition de la vie du PNJ. Limitation de degat grace aux protection.
+				cible->vie-=(degat*(100-protection))/100;
+										
+				//degradation des equipements de protection/
+				degradation_equip_protec(cible);
+				}
+				else
+				{
+				
+				cible->vie-=degat;
+				//ICI GESTION DE L EXPLOSION DES BOUTEILLES DE GAZ, DE LA MORT D'UN PERSO
+				}
+			}	
+			else
+			{
+				
+				protection=calcul_protec(jr);
+				//Diminition de la vie du PNJ. Limitation de degat grace aux protection.
+				jr->vie-=(degat*(100-protection))/100;
+										
+				//degradation des equipements de protection/
+				degradation_equip_protec(jr);
+				
+							
+			}
+			
+			
+				return degat;
+	}
+	
+	
+}
+
+
+
+// Fonction pour calculer et apliquer des dégats en fonction de la position d'un obstacle
+// Différent de degat cible car on considere deja que l'obstacle a été touché
+// grace a la fonction proba toucher obstacle
+bool moteur_jeu::calcul_cible_atteinte(joueur *jr, acteur *act,acteur *cible)
+{
+	
+	int dexnb;
+	int distance;
+	if(jr!=NULL && act==NULL) // Si c'est le joueur qui tire
+	{
+				distance=int(sqrt(double((jr->x-cible->x)*(jr->x-cible->x)+(jr->y-cible->y)*(jr->y-cible->y))));
+				
+					// Proba de toucher.
+					
+					// DISTANCE COURTE ---------------------distance< dxtrt*4/10 -> max 8 cases + 2 case max pour tireur sang froid
+					if(distance<=(jr->dexterite*3)/10+int(jr->tireur_sang_froid)*genrand_int32()%3)
+					{
+						printf("tir sur cible:dis %d distance courte %d prctage %d\n",distance,(jr->dexterite*2)/10+int(jr->tireur_sang_froid)*genrand_int32()%3,95+int(jr->tireur_sang_froid)*3);
+								if(genrand_int32()%101<90+int(jr->tireur_sang_froid)*3-distance*distance) // 95% de chance de toucher -> 98 pour tireur de sang froid
+								{
+									
+									return true;
+								}
+								return false;
+					}
+					// ----------------------------------------------
+					else // Grance distance proba de toucher diminue avec la distance
+					{
+				         dexnb= jr->dexterite*jr->dexterite*3*3/100;
+						
+						printf("tir sur cible: distance longue %d\n",dexnb*100/(distance*distance)+int(jr->tireur_sang_froid)*10);
+						
+						// La chance de toucher un ennemi varie en /d^2 avec un bonus de 10% pour les tireurs de sang froid  
+						 if(genrand_int32()%101<dexnb*100/(distance*distance)+int(jr->tireur_sang_froid)*10)
+						 {
+						 	return true;
+						 }		
+						
+					}
+	}
+	else// Sinon c'est act qui tire
+	{
+			
+			if(jr==NULL)//Si le joueur n'est pas la cible
+			{
+					distance=abs(act->x-cible->x)*abs(act->y-cible->y);
+				
+					// Proba de toucher.
+					
+					// DISTANCE COURTE ---------------------distance< dxtrt*4/10 -> max 8 cases + 2 case max pour tireur sang froid
+					if(distance<=(act->dxtrt*4)/10+1)
+					{
+								if(genrand_int32()%101<95 ) // 95% de chance de toucher -> 98 pour tireur de sang froid
+								{
+									
+									return true;
+								}
+								return false;
+					}
+					// ----------------------------------------------
+					else // Grance distance proba de toucher diminue avec la distance
+					{
+				         dexnb= act->dxtrt*act->dxtrt*4*5/100;
+						
+						// La chance de toucher un ennemi varie en /d^2 avec un bonus de 10% pour les tireurs de sang froid  
+						 if(genrand_int32()%101<dexnb*100/(distance*distance)+5)
+						 {
+						 	return true;
+						 }		
+						
+					}
+			
+			}	
+			else/////////////// SI LE JOUEUR EST LA CIBLE
+			{
+				 	distance=abs(act->x-jr->x)*abs(act->y-jr->y);
+				
+					// Proba de toucher.
+					
+					// DISTANCE COURTE ---------------------distance< dxtrt*4/10 -> max 8 cases + 2 case max pour tireur sang froid
+					if(distance<=(act->dxtrt*4)/10+1)
+					{
+								if(genrand_int32()%101<95 ) // 95% de chance de toucher -> 98 pour tireur de sang froid
+								{
+									
+									return true;
+								}
+								return false;
+					}
+					// ----------------------------------------------
+					else // Grance distance proba de toucher diminue avec la distance
+					{
+				         dexnb= act->dxtrt*act->dxtrt*4*5/100;
+						
+						// La chance de toucher un ennemi varie en /d^2 avec un bonus de 10% pour les tireurs de sang froid  
+						 if(genrand_int32()%101<dexnb*100/(distance*distance)+5)
+						 {
+						 	return true;
+						 }		
+						
+					}
+			
+				 			
+			}
+			
+			
+			
+	}
+return false;	
+}
 
 
 
@@ -2458,6 +4575,11 @@ int moteur_jeu::placer_joueur(int x,int y)
 // Fonction pour gerer les choix d'action du joueur!
 int moteur_jeu::gestion_action_joueur(ALLEGRO_EVENT_QUEUE *queue)
 {
+	bool tir_lent;
+	bool tir_direction;
+	int ciblex,cibley;
+	acteur *act;
+
    ALLEGRO_EVENT event;
    bool affich = false;
    int buff;
@@ -2469,7 +4591,7 @@ int moteur_jeu::gestion_action_joueur(ALLEGRO_EVENT_QUEUE *queue)
 		affiche_objets();
 		affiche_acteurs(); 
 	 	affiche_joueur();
-	 	//affiche_interface();
+	 	affiche_interface();
 	 	
 	 	al_flip_display();
    
@@ -2707,12 +4829,14 @@ int moteur_jeu::gestion_action_joueur(ALLEGRO_EVENT_QUEUE *queue)
 						}
 						else//plus de munitions
 						{
-							
+							ajouter_mess_console("Impossible de recharger; pas de munition dans l'inventraire!", al_map_rgb(255,0,0));	
+
 						}
 					}
 					else// Si ce n'est pas une arme rechargeable
 					{
-						
+						ajouter_mess_console("L'arme n'est pas rechargeable!", al_map_rgb(255,0,0));	
+	
 					}
 					
 				}
@@ -2720,6 +4844,57 @@ int moteur_jeu::gestion_action_joueur(ALLEGRO_EVENT_QUEUE *queue)
 			continue;
 			//LANCE DE COUTEAU SCALPEL ETC OU ALORS ARME A FEU
 			case ALLEGRO_KEY_F:
+			
+			if(choix_cible(queue,&ciblex,&cibley,&tir_direction,&tir_lent)==1)
+			{
+				
+				if(ply1.equipement[EQUIPMNT_MAIN_D]!=NULL)//Si le joueur tiens quelque chose dans sa main droite
+				{
+					////////// GESTION DES ARMES A FEU				  
+					if(objet_est_arme_rechargeable(ply1.equipement[EQUIPMNT_MAIN_D]))
+					{
+						 if(tir_lent) // Gestion du tir lent
+						 {
+						 	
+						 }
+						 else // TIR RAPIDE
+						 {
+
+						 	if(tir_direction)// SI LA TIR EST JUSTE DANS UNE DIRECTION DONNEE
+						 	{
+						 		 emission_action_cafeur(action_tab,NB_MAX_ACTION,&ply1,NULL,NULL,ciblex,cibley,false,true);	
+						 		 return 0;
+							}
+						 	else
+						 	{
+						 	
+							 	act=obtenir_ennemi(monde[carte_active],ciblex,cibley);
+							 	if(act==NULL)
+							 	{
+							 	 emission_action_cafeur(action_tab,NB_MAX_ACTION,&ply1,NULL,NULL,ciblex,cibley,true,false);
+							 	 return 0;
+								}
+							 	else
+							 	{
+							 	 emission_action_cafeur(action_tab,NB_MAX_ACTION,&ply1,NULL,act,ciblex,cibley,false,false);	
+							 	 return 0;
+								}
+							}
+						 }
+						
+					}///////// GESTION DES ARMES DE JET
+					else if(objet_est_arme(ply1.equipement[EQUIPMNT_MAIN_D]))
+					{
+						
+					}	
+					// Si la main n'est pas équipée d'une arme affichage d'un message
+					ajouter_mess_console("Pourquoi ne pas jeter des cacahuette tant que vous y etes... Imbecile!", al_map_rgb(255,255,255));
+				}
+				else // sinon message
+				{
+					ajouter_mess_console("Vous n'avez rien dans la main.", al_map_rgb(255,255,255));
+				}
+			}	
 				
 			continue;
 			//AFFICHAGE DE L'INVENTAIRE
@@ -2747,6 +4922,11 @@ int moteur_jeu::gestion_action_joueur(ALLEGRO_EVENT_QUEUE *queue)
 				return 1;	
 				}
 				break;
+			//
+			case ALLEGRO_KEY_O:
+				if(gestion_ouverturefermeture(queue)==1)
+				return 0;
+			break;
 			//
 			case ALLEGRO_KEY_C:
 				centrer_camera_joueur();
@@ -3009,7 +5189,7 @@ int moteur_jeu::recherche_cible(int *x,int *y)
 			if(monde[carte_active]->donnee_carte[monde[carte_active]->acteur_tab[i]->y][monde[carte_active]->acteur_tab[i]->x].champ_vision)
 			{
 				
-				if(monde[carte_active]->acteur_tab[i]->acteur_type>=ACTEUR_SCIENTIFIQUE_BASE)
+				if(monde[carte_active]->acteur_tab[i]->acteur_type>=ACTEUR_SCIENTIFIQUE_BASE && est_vivant(monde[carte_active]->acteur_tab[i]))
 				{
 					if(*x!=monde[carte_active]->acteur_tab[i]->x &&
 						*y!=monde[carte_active]->acteur_tab[i]->y)
@@ -3775,6 +5955,115 @@ int moteur_jeu::gestion_loot(ALLEGRO_EVENT_QUEUE *queue)
     	
 }
 
+
+///////////////////////////////
+///////////////////////////////
+int moteur_jeu::gestion_ouverturefermeture(ALLEGRO_EVENT_QUEUE *queue)
+{
+    ALLEGRO_EVENT event;	
+	bool affich=false;	
+	int x=0;
+	int y=0;
+	acteur * act=NULL;
+	int indiceobj[10];
+	int nb_obj=0;
+	
+	
+	// ****************************************************
+	// CHOIX DE LA DIRECTION DE L OUVERTURE FERMETURE DES PORTES
+	// **************************************************** 
+	ajouter_mess_console("Donner la direction de la porte", al_map_rgb(255,255,255));
+	while(1)
+	{
+		if (affich && al_is_event_queue_empty(queue)) 
+        {
+        	al_flip_display(); 
+        	affich=false;
+        }
+        al_wait_for_event(queue, &event);
+		
+		if (event.timer.source == moteur_jeu::timer_affichage) {
+         affich = true;
+        
+         continue;
+        }
+		// GESTION DES ENTREE CLAVIER
+		if (event.type == ALLEGRO_EVENT_KEY_CHAR)
+		{
+			
+			switch(event.keyboard.keycode)
+			{
+				case ALLEGRO_KEY_UP:
+				case ALLEGRO_KEY_PAD_8:
+				
+				y=-1;	
+					
+				break;
+				//
+				case ALLEGRO_KEY_DOWN:
+				case ALLEGRO_KEY_PAD_2:
+				y=1;
+				
+				break;
+				//
+				case ALLEGRO_KEY_LEFT:
+				case ALLEGRO_KEY_PAD_4:
+				x=-1;
+				
+				break;
+				//
+				case ALLEGRO_KEY_RIGHT:
+				case ALLEGRO_KEY_PAD_6:
+				x=1;
+				
+				break;
+				//
+				case ALLEGRO_KEY_PAD_1:
+				x=-1;
+				y=+1;
+				break;
+				//
+				case ALLEGRO_KEY_PAD_3:
+				x=+1;
+				y=+1;
+				break;
+				//
+				case ALLEGRO_KEY_PAD_7:
+				x=-1;
+				y=-1;
+				break;
+				//
+				case ALLEGRO_KEY_PAD_9:
+				x=+1;
+				y=-1;
+				break;
+				case ALLEGRO_KEY_ESCAPE:
+				return 0;
+				
+			
+			}
+	
+		}
+		if(x!=0|| y!=0)break;//sortie de la boucle while
+	}
+	/*****************************************************
+	*****************************************************
+	******************************************************/
+	
+
+	if(monde[carte_active]->donnee_carte[ply1.y+y][ply1.x+x].type==TILE_PORTE_FRAGILE ||
+	   monde[carte_active]->donnee_carte[ply1.y+y][ply1.x+x].type==TILE_PORTE_NORMALE ||
+	   monde[carte_active]->donnee_carte[ply1.y+y][ply1.x+x].type==TILE_PORTE_BLINDE)
+	   {
+	   	emission_action_ouvrir_fermer_porte(action_tab,NB_MAX_ACTION,&ply1,NULL, x, y);
+	    return 1;
+	   }
+	   
+	   
+   	ajouter_mess_console("Pas de portes a cet endroit!", al_map_rgb(255,255,255));
+	   
+	   return 0;
+}
 
 
 // int calcul_champ_vision()

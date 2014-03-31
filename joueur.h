@@ -17,13 +17,14 @@
 ***************************************************************/
 
 
-
+class acteur;
 
 class joueur
 {
 	public:
 		
 	char nom[32];
+	int score;
 	int bmp_index;
 	int x,y;
 	
@@ -101,6 +102,11 @@ int calcul_protec(joueur *jr);
 //retourne le nombre d'equipement detruit
 int degradation_equip_protec(joueur *jr);
 
+// Fonction qui calcule la dégrasation de l arme equipee
+//
+// Si le joueur frappe avec son arme ou l'utilise, 
+// on enleve 1 a l etat général de cette derniere.
+int degradation_equip_arme(joueur *jr);
 
 //int calcul_bonus_vit_deplacement(joeur *jr);
 // Retourne le bonus de vitesse de déplacement du à l'equipement 
@@ -133,7 +139,17 @@ int maj_adrenaline(joueur *jr);
 int maj_hemorragie(joueur *jr);
 
 
+
+
 int ajout_adrenaline(joueur *jr,int prise_degat,int don_degat,bool mort_ennemi);
+
+
+//Fonction a appeler en cas de dégat.
+// 
+// tirage pour savoir si le joueur est en état d'hémorragie.
+//Si c'est le cas -> met hemorragie a vrai et retourne 1
+// sinon, retourne 0;
+int faire_saigner(joueur *jr);
 
 /***********************************************************************
 ********************FONCTION DE L'utilisation de l'équipement**********/
@@ -182,3 +198,17 @@ int recharger_arme(joueur *jr,int emplacement=EQUIPMNT_MAIN_D,bool sac=false);
 
 
 
+/******************************************************************
+***************FONCTION DE GESTION DU SCORE **********************/
+
+int ajout_score_deplacement(joueur *jr);
+
+int ajout_score_changement_niveau(joueur *jr,int niveau);
+
+int ajout_score_mort_monstre(joueur *jr,acteur *act);
+
+
+/*****************************************************************
+*****************DEBUGGAGE DU JEU********************************/
+
+int creer_jean_dupont(joueur *jr);

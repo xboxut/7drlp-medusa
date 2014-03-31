@@ -6,9 +6,11 @@
 #include "const_act_joueur.h"
 #include "const_bmp_index.h"
 
+
 #include "objet.h"
 #include "acteur.h"
-
+#include "joueur.h"
+#include "action.h"
 
 
 // DEFINITION DE L ENSEMBLE DES ACTEUR PREFAB, DE LEUR NOM ET DESCRIPTION
@@ -20,6 +22,37 @@
 // Constructeur destructeur des acteurs.
 acteur::acteur()
 {
+	  acteur_nom=NULL;
+	  description=NULL;
+	  bmp_index=0;
+	  bmp_index_detruit=0;
+	
+	  x=-1;
+	  y=-1;
+	
+	  bloquant=false;
+	
+	 frce=0;
+	dxtrt=0;
+	 vitesse=0;
+	
+	vie=0;
+	vie_max=0;
+	
+	coup_critique=0;//sur 1000
+	
+	hemorragie=false;
+	tic_hemorragie=0;
+	//type de comportement
+	comportement_type=0;
+	fuite=false;//savoir si le personnage doit fuir ou non
+			   // utile pour les comportement mitigé agresseur/ fuite	
+	effet_memoire=0;//savoir combien e temps le perso s'echappe
+	
+	
+	// reserve de point d action
+	point_action_restant=0;
+	
 }
 acteur::~acteur()
 {
@@ -50,6 +83,8 @@ int creer_prefab_acteurs()
 	strcpy(description_acteur[ACTEUR_BUREAU],"Un bureau, couvert de papier. Les tiroirs contiennent uniquement des dossiers, quelques stylos, et une bouteille de gnole.");
 	
 	prefab_acteur[ACTEUR_BUREAU].acteur_type=ACTEUR_BUREAU;
+	prefab_acteur[ACTEUR_BUREAU].acteur_nom=nom_acteur[ACTEUR_BUREAU];
+	prefab_acteur[ACTEUR_BUREAU].description=description_acteur[ACTEUR_BUREAU];
 	prefab_acteur[ACTEUR_BUREAU].bmp_index=BMP_BUREAU;
 	prefab_acteur[ACTEUR_BUREAU].bmp_index_detruit=0;
 	prefab_acteur[ACTEUR_BUREAU].x=-1;
@@ -62,12 +97,13 @@ int creer_prefab_acteurs()
 	prefab_acteur[ACTEUR_BUREAU].vie_max=0;
 	prefab_acteur[ACTEUR_BUREAU].coup_critique=0;
 	prefab_acteur[ACTEUR_BUREAU].hemorragie=false;
-	prefab_acteur[ACTEUR_BUREAU].hemorragie_tic=0;
+	prefab_acteur[ACTEUR_BUREAU].tic_hemorragie=0;
 	prefab_acteur[ACTEUR_BUREAU].comportement_type=CMPRTMNT_RIEN;
 	prefab_acteur[ACTEUR_BUREAU].fuite=false;
 	prefab_acteur[ACTEUR_BUREAU].point_action_restant=0;
 	for(int i=0;i<MAX_EQUIPMNT;i++)	
 	prefab_acteur[ACTEUR_BUREAU].equipement[i]=NULL;
+	prefab_acteur[ACTEUR_BUREAU].ajout_score=0;
 /////////////////////////////////////////////////////////////
 
 /////////////////////////////////////////////////////////////
@@ -78,6 +114,8 @@ int creer_prefab_acteurs()
 	strcpy(description_acteur[ACTEUR_ETAGERE],"Une etagere contenant des livres, du bric et du broc. Au milieux des ouvrages et des documents, des bibelots en cristal cotoient des tetes reduites et des seringues usagees.");
 	
 	prefab_acteur[ACTEUR_ETAGERE].acteur_type=ACTEUR_ETAGERE;
+	prefab_acteur[ACTEUR_ETAGERE].acteur_nom=nom_acteur[ACTEUR_ETAGERE];
+	prefab_acteur[ACTEUR_ETAGERE].description=description_acteur[ACTEUR_ETAGERE];
 	prefab_acteur[ACTEUR_ETAGERE].bmp_index=BMP_ETAGERE;
 	prefab_acteur[ACTEUR_ETAGERE].bmp_index_detruit=0;
 	prefab_acteur[ACTEUR_ETAGERE].x=-1;
@@ -90,12 +128,13 @@ int creer_prefab_acteurs()
 	prefab_acteur[ACTEUR_ETAGERE].vie_max=0;
 	prefab_acteur[ACTEUR_ETAGERE].coup_critique=0;
 	prefab_acteur[ACTEUR_ETAGERE].hemorragie=false;
-	prefab_acteur[ACTEUR_ETAGERE].hemorragie_tic=0;
+	prefab_acteur[ACTEUR_ETAGERE].tic_hemorragie=0;
 	prefab_acteur[ACTEUR_ETAGERE].comportement_type=CMPRTMNT_RIEN;
 	prefab_acteur[ACTEUR_ETAGERE].fuite=false;
 	prefab_acteur[ACTEUR_ETAGERE].point_action_restant=0;
 	for(int i=0;i<MAX_EQUIPMNT;i++)	
 	prefab_acteur[ACTEUR_ETAGERE].equipement[i]=NULL;
+	prefab_acteur[ACTEUR_ETAGERE].ajout_score=0;
 ///////////////////////////////////////////////////////////	
 
 /////////////////////////////////////////////////////////////
@@ -106,6 +145,8 @@ int creer_prefab_acteurs()
 	strcpy(description_acteur[ACTEUR_TABLE_OPERATION],"Une table d'operation en acier inoxydable. Des taches de sang la parseme.");
 	
 	prefab_acteur[ACTEUR_TABLE_OPERATION].acteur_type=ACTEUR_TABLE_OPERATION;
+	prefab_acteur[ACTEUR_TABLE_OPERATION].acteur_nom=nom_acteur[ACTEUR_TABLE_OPERATION];
+	prefab_acteur[ACTEUR_TABLE_OPERATION].description=description_acteur[ACTEUR_TABLE_OPERATION];
 	prefab_acteur[ACTEUR_TABLE_OPERATION].bmp_index=BMP_TABLE_OPERATION;
 	prefab_acteur[ACTEUR_TABLE_OPERATION].bmp_index_detruit=0;
 	prefab_acteur[ACTEUR_TABLE_OPERATION].x=-1;
@@ -118,12 +159,13 @@ int creer_prefab_acteurs()
 	prefab_acteur[ACTEUR_TABLE_OPERATION].vie_max=0;
 	prefab_acteur[ACTEUR_TABLE_OPERATION].coup_critique=0;
 	prefab_acteur[ACTEUR_TABLE_OPERATION].hemorragie=false;
-	prefab_acteur[ACTEUR_TABLE_OPERATION].hemorragie_tic=0;
+	prefab_acteur[ACTEUR_TABLE_OPERATION].tic_hemorragie=0;
 	prefab_acteur[ACTEUR_TABLE_OPERATION].comportement_type=CMPRTMNT_RIEN;
 	prefab_acteur[ACTEUR_TABLE_OPERATION].fuite=false;
 	prefab_acteur[ACTEUR_TABLE_OPERATION].point_action_restant=0;
 	for(int i=0;i<MAX_EQUIPMNT;i++)	
 	prefab_acteur[ACTEUR_TABLE_OPERATION].equipement[i]=NULL;
+	prefab_acteur[ACTEUR_TABLE_OPERATION].ajout_score=0;
 ///////////////////////////////////////////////////////////	
 
 /////////////////////////////////////////////////////////////
@@ -134,6 +176,8 @@ int creer_prefab_acteurs()
 	strcpy(description_acteur[ACTEUR_TABLE],"Une table de travail, couverte de marque de tasses.");
 	
 	prefab_acteur[ACTEUR_TABLE].acteur_type=ACTEUR_TABLE;
+	prefab_acteur[ACTEUR_TABLE].acteur_nom=nom_acteur[ACTEUR_TABLE];
+	prefab_acteur[ACTEUR_TABLE].description=description_acteur[ACTEUR_TABLE];
 	prefab_acteur[ACTEUR_TABLE].bmp_index=BMP_TABLE;
 	prefab_acteur[ACTEUR_TABLE].bmp_index_detruit=0;
 	prefab_acteur[ACTEUR_TABLE].x=-1;
@@ -146,12 +190,13 @@ int creer_prefab_acteurs()
 	prefab_acteur[ACTEUR_TABLE].vie_max=0;
 	prefab_acteur[ACTEUR_TABLE].coup_critique=0;
 	prefab_acteur[ACTEUR_TABLE].hemorragie=false;
-	prefab_acteur[ACTEUR_TABLE].hemorragie_tic=0;
+	prefab_acteur[ACTEUR_TABLE].tic_hemorragie=0;
 	prefab_acteur[ACTEUR_TABLE].comportement_type=CMPRTMNT_RIEN;
 	prefab_acteur[ACTEUR_TABLE].fuite=false;
 	prefab_acteur[ACTEUR_TABLE].point_action_restant=0;
 	for(int i=0;i<MAX_EQUIPMNT;i++)	
 	prefab_acteur[ACTEUR_TABLE].equipement[i]=NULL;
+	prefab_acteur[ACTEUR_TABLE].ajout_score=0;
 ///////////////////////////////////////////////////////////	
 
 /////////////////////////////////////////////////////////////
@@ -162,6 +207,8 @@ int creer_prefab_acteurs()
 	strcpy(description_acteur[ACTEUR_RACK_ARME],"Un rack destine a accueillir des armes. Une barre, habituellement cadenacee, permet de bloquer l'accès aux fusils");
 	
 	prefab_acteur[ACTEUR_RACK_ARME].acteur_type=ACTEUR_RACK_ARME;
+	prefab_acteur[ACTEUR_RACK_ARME].acteur_nom=nom_acteur[ACTEUR_RACK_ARME];
+	prefab_acteur[ACTEUR_RACK_ARME].description=description_acteur[ACTEUR_RACK_ARME];	
 	prefab_acteur[ACTEUR_RACK_ARME].bmp_index=BMP_RACK_ARME;
 	prefab_acteur[ACTEUR_RACK_ARME].bmp_index_detruit=0;
 	prefab_acteur[ACTEUR_RACK_ARME].x=-1;
@@ -174,12 +221,13 @@ int creer_prefab_acteurs()
 	prefab_acteur[ACTEUR_RACK_ARME].vie_max=0;
 	prefab_acteur[ACTEUR_RACK_ARME].coup_critique=0;
 	prefab_acteur[ACTEUR_RACK_ARME].hemorragie=false;
-	prefab_acteur[ACTEUR_RACK_ARME].hemorragie_tic=0;
+	prefab_acteur[ACTEUR_RACK_ARME].tic_hemorragie=0;
 	prefab_acteur[ACTEUR_RACK_ARME].comportement_type=CMPRTMNT_RIEN;
 	prefab_acteur[ACTEUR_RACK_ARME].fuite=false;
 	prefab_acteur[ACTEUR_RACK_ARME].point_action_restant=0;
 	for(int i=0;i<MAX_EQUIPMNT;i++)	
 	prefab_acteur[ACTEUR_RACK_ARME].equipement[i]=NULL;
+	prefab_acteur[ACTEUR_RACK_ARME].ajout_score=0;
 ///////////////////////////////////////////////////////////	
 
 /////////////////////////////////////////////////////////////
@@ -190,6 +238,8 @@ int creer_prefab_acteurs()
 	strcpy(description_acteur[ACTEUR_ARMOIRE_MEDIC],"Une armoire a pharmacie; elle contient l'ensemble des instruments et des medicaments necessaires aux soins des petits bobos.");
 	
 	prefab_acteur[ACTEUR_ARMOIRE_MEDIC].acteur_type=ACTEUR_ARMOIRE_MEDIC;
+	prefab_acteur[ACTEUR_ARMOIRE_MEDIC].acteur_nom=nom_acteur[ACTEUR_ARMOIRE_MEDIC];
+	prefab_acteur[ACTEUR_ARMOIRE_MEDIC].description=description_acteur[ACTEUR_ARMOIRE_MEDIC];	
 	prefab_acteur[ACTEUR_ARMOIRE_MEDIC].bmp_index=BMP_ARMOIRE_MEDIC;
 	prefab_acteur[ACTEUR_ARMOIRE_MEDIC].bmp_index_detruit=0;
 	prefab_acteur[ACTEUR_ARMOIRE_MEDIC].x=-1;
@@ -202,12 +252,13 @@ int creer_prefab_acteurs()
 	prefab_acteur[ACTEUR_ARMOIRE_MEDIC].vie_max=0;
 	prefab_acteur[ACTEUR_ARMOIRE_MEDIC].coup_critique=0;
 	prefab_acteur[ACTEUR_ARMOIRE_MEDIC].hemorragie=false;
-	prefab_acteur[ACTEUR_ARMOIRE_MEDIC].hemorragie_tic=0;
+	prefab_acteur[ACTEUR_ARMOIRE_MEDIC].tic_hemorragie=0;
 	prefab_acteur[ACTEUR_ARMOIRE_MEDIC].comportement_type=CMPRTMNT_RIEN;
 	prefab_acteur[ACTEUR_ARMOIRE_MEDIC].fuite=false;
 	prefab_acteur[ACTEUR_ARMOIRE_MEDIC].point_action_restant=0;
 	for(int i=0;i<MAX_EQUIPMNT;i++)	
 	prefab_acteur[ACTEUR_ARMOIRE_MEDIC].equipement[i]=NULL;
+	prefab_acteur[ACTEUR_ARMOIRE_MEDIC].ajout_score=0;
 ///////////////////////////////////////////////////////////	
 		
 /////////////////////////////////////////////////////////////
@@ -218,6 +269,8 @@ int creer_prefab_acteurs()
 	strcpy(description_acteur[ACTEUR_CONSOLE_INFO],"Une console informatique, avec de nombreux claviers et ecrans.");
 	
 	prefab_acteur[ACTEUR_CONSOLE_INFO].acteur_type=ACTEUR_CONSOLE_INFO;
+	prefab_acteur[ACTEUR_CONSOLE_INFO].acteur_nom=nom_acteur[ACTEUR_CONSOLE_INFO];
+	prefab_acteur[ACTEUR_CONSOLE_INFO].description=description_acteur[ACTEUR_CONSOLE_INFO];	
 	prefab_acteur[ACTEUR_CONSOLE_INFO].bmp_index=BMP_CONSOLE_INFO;
 	prefab_acteur[ACTEUR_CONSOLE_INFO].bmp_index_detruit=0;
 	prefab_acteur[ACTEUR_CONSOLE_INFO].x=-1;
@@ -230,12 +283,13 @@ int creer_prefab_acteurs()
 	prefab_acteur[ACTEUR_CONSOLE_INFO].vie_max=0;
 	prefab_acteur[ACTEUR_CONSOLE_INFO].coup_critique=0;
 	prefab_acteur[ACTEUR_CONSOLE_INFO].hemorragie=false;
-	prefab_acteur[ACTEUR_CONSOLE_INFO].hemorragie_tic=0;
+	prefab_acteur[ACTEUR_CONSOLE_INFO].tic_hemorragie=0;
 	prefab_acteur[ACTEUR_CONSOLE_INFO].comportement_type=CMPRTMNT_RIEN;
 	prefab_acteur[ACTEUR_CONSOLE_INFO].fuite=false;
 	prefab_acteur[ACTEUR_CONSOLE_INFO].point_action_restant=0;
 	for(int i=0;i<MAX_EQUIPMNT;i++)	
 	prefab_acteur[ACTEUR_CONSOLE_INFO].equipement[i]=NULL;
+	prefab_acteur[ACTEUR_CONSOLE_INFO].ajout_score=0;
 ///////////////////////////////////////////////////////////	
 
 /////////////////////////////////////////////////////////////
@@ -246,8 +300,10 @@ int creer_prefab_acteurs()
 	strcpy(description_acteur[ACTEUR_BOUTEILLE_GAZ],"Une bouteille de dihydrogene. Attention, cette bouteille contient du gaz tres inflammable, evitez de l'endommager.");
 	
 	prefab_acteur[ACTEUR_BOUTEILLE_GAZ].acteur_type=ACTEUR_BOUTEILLE_GAZ;
+	prefab_acteur[ACTEUR_BOUTEILLE_GAZ].acteur_nom=nom_acteur[ACTEUR_BOUTEILLE_GAZ];
+	prefab_acteur[ACTEUR_BOUTEILLE_GAZ].description=description_acteur[ACTEUR_BOUTEILLE_GAZ];	
 	prefab_acteur[ACTEUR_BOUTEILLE_GAZ].bmp_index=BMP_BOUTEILLE_GAZ;
-	prefab_acteur[ACTEUR_BOUTEILLE_GAZ].bmp_index_detruit=0;
+	prefab_acteur[ACTEUR_BOUTEILLE_GAZ].bmp_index_detruit=BMP_BOUTEILLE_GAZ_BRISE;
 	prefab_acteur[ACTEUR_BOUTEILLE_GAZ].x=-1;
 	prefab_acteur[ACTEUR_BOUTEILLE_GAZ].y=-1;
 	prefab_acteur[ACTEUR_BOUTEILLE_GAZ].bloquant=true;
@@ -258,12 +314,13 @@ int creer_prefab_acteurs()
 	prefab_acteur[ACTEUR_BOUTEILLE_GAZ].vie_max=40;
 	prefab_acteur[ACTEUR_BOUTEILLE_GAZ].coup_critique=0;
 	prefab_acteur[ACTEUR_BOUTEILLE_GAZ].hemorragie=false;
-	prefab_acteur[ACTEUR_BOUTEILLE_GAZ].hemorragie_tic=0;
+	prefab_acteur[ACTEUR_BOUTEILLE_GAZ].tic_hemorragie=0;
 	prefab_acteur[ACTEUR_BOUTEILLE_GAZ].comportement_type=CMPRTMNT_RIEN;
 	prefab_acteur[ACTEUR_BOUTEILLE_GAZ].fuite=false;
 	prefab_acteur[ACTEUR_BOUTEILLE_GAZ].point_action_restant=0;
 	for(int i=0;i<MAX_EQUIPMNT;i++)	
 	prefab_acteur[ACTEUR_BOUTEILLE_GAZ].equipement[i]=NULL;
+	prefab_acteur[ACTEUR_BOUTEILLE_GAZ].ajout_score=0;
 ///////////////////////////////////////////////////////////	
 
 /////////////////////////////////////////////////////////////
@@ -274,8 +331,10 @@ int creer_prefab_acteurs()
 	strcpy(description_acteur[ACTEUR_CONTENEUR_ACIDE],"Un conteneur en plastique rempli d'acide nitrique.");
 	
 	prefab_acteur[ACTEUR_CONTENEUR_ACIDE].acteur_type=ACTEUR_CONTENEUR_ACIDE;
+	prefab_acteur[ACTEUR_CONTENEUR_ACIDE].acteur_nom=nom_acteur[ACTEUR_CONTENEUR_ACIDE];
+	prefab_acteur[ACTEUR_CONTENEUR_ACIDE].description=description_acteur[ACTEUR_CONTENEUR_ACIDE];
 	prefab_acteur[ACTEUR_CONTENEUR_ACIDE].bmp_index=BMP_CONTENEUR_ACIDE;
-	prefab_acteur[ACTEUR_CONTENEUR_ACIDE].bmp_index_detruit=0;
+	prefab_acteur[ACTEUR_CONTENEUR_ACIDE].bmp_index_detruit=BMP_CONTENEUR_ACIDE_BRISE;
 	prefab_acteur[ACTEUR_CONTENEUR_ACIDE].x=-1;
 	prefab_acteur[ACTEUR_CONTENEUR_ACIDE].y=-1;
 	prefab_acteur[ACTEUR_CONTENEUR_ACIDE].bloquant=true;
@@ -286,12 +345,13 @@ int creer_prefab_acteurs()
 	prefab_acteur[ACTEUR_CONTENEUR_ACIDE].vie_max=20;
 	prefab_acteur[ACTEUR_CONTENEUR_ACIDE].coup_critique=0;
 	prefab_acteur[ACTEUR_CONTENEUR_ACIDE].hemorragie=false;
-	prefab_acteur[ACTEUR_CONTENEUR_ACIDE].hemorragie_tic=0;
+	prefab_acteur[ACTEUR_CONTENEUR_ACIDE].tic_hemorragie=0;
 	prefab_acteur[ACTEUR_CONTENEUR_ACIDE].comportement_type=CMPRTMNT_RIEN;
 	prefab_acteur[ACTEUR_CONTENEUR_ACIDE].fuite=false;
 	prefab_acteur[ACTEUR_CONTENEUR_ACIDE].point_action_restant=0;
 	for(int i=0;i<MAX_EQUIPMNT;i++)	
 	prefab_acteur[ACTEUR_CONTENEUR_ACIDE].equipement[i]=NULL;
+	prefab_acteur[ACTEUR_CONTENEUR_ACIDE].ajout_score=0;
 ///////////////////////////////////////////////////////////	
 
 /////////////////////////////////////////////////////////////
@@ -302,6 +362,8 @@ int creer_prefab_acteurs()
 	strcpy(description_acteur[ACTEUR_LAVABO],"Un lavabo en email blanc, a la proprete douteuse.");
 	
 	prefab_acteur[ACTEUR_LAVABO].acteur_type=ACTEUR_LAVABO;
+	prefab_acteur[ACTEUR_LAVABO].acteur_nom=nom_acteur[ACTEUR_LAVABO];
+	prefab_acteur[ACTEUR_LAVABO].description=description_acteur[ACTEUR_LAVABO];
 	prefab_acteur[ACTEUR_LAVABO].bmp_index=BMP_LAVABO;
 	prefab_acteur[ACTEUR_LAVABO].bmp_index_detruit=0;
 	prefab_acteur[ACTEUR_LAVABO].x=-1;
@@ -314,12 +376,13 @@ int creer_prefab_acteurs()
 	prefab_acteur[ACTEUR_LAVABO].vie_max=0;
 	prefab_acteur[ACTEUR_LAVABO].coup_critique=0;
 	prefab_acteur[ACTEUR_LAVABO].hemorragie=false;
-	prefab_acteur[ACTEUR_LAVABO].hemorragie_tic=0;
+	prefab_acteur[ACTEUR_LAVABO].tic_hemorragie=0;
 	prefab_acteur[ACTEUR_LAVABO].comportement_type=CMPRTMNT_RIEN;
 	prefab_acteur[ACTEUR_LAVABO].fuite=false;
 	prefab_acteur[ACTEUR_LAVABO].point_action_restant=0;
 	for(int i=0;i<MAX_EQUIPMNT;i++)	
 	prefab_acteur[ACTEUR_LAVABO].equipement[i]=NULL;
+	prefab_acteur[ACTEUR_LAVABO].ajout_score=0;
 ///////////////////////////////////////////////////////////	
 
 /////////////////////////////////////////////////////////////
@@ -330,6 +393,8 @@ int creer_prefab_acteurs()
 	strcpy(description_acteur[ACTEUR_TOILETTES],"Des toilettes en email. Au vu des taches qui les parsemes, le dernier utilisateur a du avoir une experience malheureuse avec la nourriture asiatique.");
 	
 	prefab_acteur[ACTEUR_TOILETTES].acteur_type=ACTEUR_TOILETTES;
+	prefab_acteur[ACTEUR_TOILETTES].acteur_nom=nom_acteur[ACTEUR_TOILETTES];
+	prefab_acteur[ACTEUR_TOILETTES].description=description_acteur[ACTEUR_TOILETTES];
 	prefab_acteur[ACTEUR_TOILETTES].bmp_index=BMP_TOILETTES;
 	prefab_acteur[ACTEUR_TOILETTES].bmp_index_detruit=0;
 	prefab_acteur[ACTEUR_TOILETTES].x=-1;
@@ -342,12 +407,13 @@ int creer_prefab_acteurs()
 	prefab_acteur[ACTEUR_TOILETTES].vie_max=0;
 	prefab_acteur[ACTEUR_TOILETTES].coup_critique=0;
 	prefab_acteur[ACTEUR_TOILETTES].hemorragie=false;
-	prefab_acteur[ACTEUR_TOILETTES].hemorragie_tic=0;
+	prefab_acteur[ACTEUR_TOILETTES].tic_hemorragie=0;
 	prefab_acteur[ACTEUR_TOILETTES].comportement_type=CMPRTMNT_RIEN;
 	prefab_acteur[ACTEUR_TOILETTES].fuite=false;
 	prefab_acteur[ACTEUR_TOILETTES].point_action_restant=0;
 	for(int i=0;i<MAX_EQUIPMNT;i++)	
 	prefab_acteur[ACTEUR_TOILETTES].equipement[i]=NULL;
+	prefab_acteur[ACTEUR_TOILETTES].ajout_score=0;
 ///////////////////////////////////////////////////////////	
 
 /////////////////////////////////////////////////////////////
@@ -358,6 +424,8 @@ int creer_prefab_acteurs()
 	strcpy(description_acteur[ACTEUR_LIT],"Un lit de camp.");
 	
 	prefab_acteur[ACTEUR_LIT].acteur_type=ACTEUR_LIT;
+	prefab_acteur[ACTEUR_LIT].acteur_nom=nom_acteur[ACTEUR_LIT];
+	prefab_acteur[ACTEUR_LIT].description=description_acteur[ACTEUR_LIT];
 	prefab_acteur[ACTEUR_LIT].bmp_index=BMP_LIT;
 	prefab_acteur[ACTEUR_LIT].bmp_index_detruit=0;
 	prefab_acteur[ACTEUR_LIT].x=-1;
@@ -370,12 +438,13 @@ int creer_prefab_acteurs()
 	prefab_acteur[ACTEUR_LIT].vie_max=0;
 	prefab_acteur[ACTEUR_LIT].coup_critique=0;
 	prefab_acteur[ACTEUR_LIT].hemorragie=false;
-	prefab_acteur[ACTEUR_LIT].hemorragie_tic=0;
+	prefab_acteur[ACTEUR_LIT].tic_hemorragie=0;
 	prefab_acteur[ACTEUR_LIT].comportement_type=CMPRTMNT_RIEN;
 	prefab_acteur[ACTEUR_LIT].fuite=false;
 	prefab_acteur[ACTEUR_LIT].point_action_restant=0;
 	for(int i=0;i<MAX_EQUIPMNT;i++)	
 	prefab_acteur[ACTEUR_LIT].equipement[i]=NULL;
+	prefab_acteur[ACTEUR_LIT].ajout_score=0;
 ///////////////////////////////////////////////////////////	
 
 /////////////////////////////////////////////////////////////
@@ -390,8 +459,10 @@ int creer_prefab_acteurs()
 	strcpy(description_acteur[ACTEUR_SCIENTIFIQUE_BASE],"Un scientifique a l'air particulierement bete et mauvais.");
 	
 	prefab_acteur[ACTEUR_SCIENTIFIQUE_BASE].acteur_type=ACTEUR_SCIENTIFIQUE_BASE;
+	prefab_acteur[ACTEUR_SCIENTIFIQUE_BASE].acteur_nom=nom_acteur[ACTEUR_SCIENTIFIQUE_BASE];
+	prefab_acteur[ACTEUR_SCIENTIFIQUE_BASE].description=description_acteur[ACTEUR_SCIENTIFIQUE_BASE];	
 	prefab_acteur[ACTEUR_SCIENTIFIQUE_BASE].bmp_index=BMP_SCIENTIFIQUE;
-	prefab_acteur[ACTEUR_SCIENTIFIQUE_BASE].bmp_index_detruit=0;
+	prefab_acteur[ACTEUR_SCIENTIFIQUE_BASE].bmp_index_detruit=BMP_H_CADAVRE;
 	prefab_acteur[ACTEUR_SCIENTIFIQUE_BASE].x=-1;
 	prefab_acteur[ACTEUR_SCIENTIFIQUE_BASE].y=-1;
 	prefab_acteur[ACTEUR_SCIENTIFIQUE_BASE].bloquant=true;
@@ -402,12 +473,13 @@ int creer_prefab_acteurs()
 	prefab_acteur[ACTEUR_SCIENTIFIQUE_BASE].vie_max=30;
 	prefab_acteur[ACTEUR_SCIENTIFIQUE_BASE].coup_critique=10;
 	prefab_acteur[ACTEUR_SCIENTIFIQUE_BASE].hemorragie=false;
-	prefab_acteur[ACTEUR_SCIENTIFIQUE_BASE].hemorragie_tic=0;
+	prefab_acteur[ACTEUR_SCIENTIFIQUE_BASE].tic_hemorragie=0;
 	prefab_acteur[ACTEUR_SCIENTIFIQUE_BASE].comportement_type=CMPRTMNT_AGRESSIF_FUYARD;
 	prefab_acteur[ACTEUR_SCIENTIFIQUE_BASE].fuite=false;
 	prefab_acteur[ACTEUR_SCIENTIFIQUE_BASE].point_action_restant=0;
 	for(int i=0;i<MAX_EQUIPMNT;i++)	
 	prefab_acteur[ACTEUR_SCIENTIFIQUE_BASE].equipement[i]=NULL;
+	prefab_acteur[ACTEUR_SCIENTIFIQUE_BASE].ajout_score=0;
 ///////////////////////////////////////////////////////////	
 
 /////////////////////////////////////////////////////////////
@@ -418,8 +490,10 @@ int creer_prefab_acteurs()
 	strcpy(description_acteur[ACTEUR_SCIENTIFIQUE_PEUREUX],"Un scientifique a l'air particulierement bete et mauvais.");
 	
 	prefab_acteur[ACTEUR_SCIENTIFIQUE_PEUREUX].acteur_type=ACTEUR_SCIENTIFIQUE_PEUREUX;
+	prefab_acteur[ACTEUR_SCIENTIFIQUE_PEUREUX].acteur_nom=nom_acteur[ACTEUR_SCIENTIFIQUE_PEUREUX];
+	prefab_acteur[ACTEUR_SCIENTIFIQUE_PEUREUX].description=description_acteur[ACTEUR_SCIENTIFIQUE_PEUREUX];
 	prefab_acteur[ACTEUR_SCIENTIFIQUE_PEUREUX].bmp_index=BMP_SCIENTIFIQUE;
-	prefab_acteur[ACTEUR_SCIENTIFIQUE_PEUREUX].bmp_index_detruit=0;
+	prefab_acteur[ACTEUR_SCIENTIFIQUE_PEUREUX].bmp_index_detruit=BMP_H_CADAVRE;
 	prefab_acteur[ACTEUR_SCIENTIFIQUE_PEUREUX].x=-1;
 	prefab_acteur[ACTEUR_SCIENTIFIQUE_PEUREUX].y=-1;
 	prefab_acteur[ACTEUR_SCIENTIFIQUE_PEUREUX].bloquant=true;
@@ -430,12 +504,13 @@ int creer_prefab_acteurs()
 	prefab_acteur[ACTEUR_SCIENTIFIQUE_PEUREUX].vie_max=15;
 	prefab_acteur[ACTEUR_SCIENTIFIQUE_PEUREUX].coup_critique=3;
 	prefab_acteur[ACTEUR_SCIENTIFIQUE_PEUREUX].hemorragie=false;
-	prefab_acteur[ACTEUR_SCIENTIFIQUE_PEUREUX].hemorragie_tic=0;
+	prefab_acteur[ACTEUR_SCIENTIFIQUE_PEUREUX].tic_hemorragie=0;
 	prefab_acteur[ACTEUR_SCIENTIFIQUE_PEUREUX].comportement_type=CMPRTMNT_FUYARD;
 	prefab_acteur[ACTEUR_SCIENTIFIQUE_PEUREUX].fuite=false;
 	prefab_acteur[ACTEUR_SCIENTIFIQUE_PEUREUX].point_action_restant=0;
 	for(int i=0;i<MAX_EQUIPMNT;i++)	
 	prefab_acteur[ACTEUR_SCIENTIFIQUE_PEUREUX].equipement[i]=NULL;
+	prefab_acteur[ACTEUR_SCIENTIFIQUE_PEUREUX].ajout_score=0;
 ///////////////////////////////////////////////////////////	
 
 
@@ -447,8 +522,10 @@ int creer_prefab_acteurs()
 	strcpy(description_acteur[ACTEUR_SCIENTIFIQUE_FOU],"Un scientifique a l'air particulierement bete et mauvais. Une lueur inquietante brille dans ses yeux.");
 	
 	prefab_acteur[ACTEUR_SCIENTIFIQUE_FOU].acteur_type=ACTEUR_SCIENTIFIQUE_FOU;
+	prefab_acteur[ACTEUR_SCIENTIFIQUE_FOU].acteur_nom=nom_acteur[ACTEUR_SCIENTIFIQUE_FOU];
+	prefab_acteur[ACTEUR_SCIENTIFIQUE_FOU].description=description_acteur[ACTEUR_SCIENTIFIQUE_FOU];
 	prefab_acteur[ACTEUR_SCIENTIFIQUE_FOU].bmp_index=BMP_SCIENTIFIQUE;
-	prefab_acteur[ACTEUR_SCIENTIFIQUE_FOU].bmp_index_detruit=0;
+	prefab_acteur[ACTEUR_SCIENTIFIQUE_FOU].bmp_index_detruit=BMP_H_CADAVRE;
 	prefab_acteur[ACTEUR_SCIENTIFIQUE_FOU].x=-1;
 	prefab_acteur[ACTEUR_SCIENTIFIQUE_FOU].y=-1;
 	prefab_acteur[ACTEUR_SCIENTIFIQUE_FOU].bloquant=true;
@@ -459,12 +536,13 @@ int creer_prefab_acteurs()
 	prefab_acteur[ACTEUR_SCIENTIFIQUE_FOU].vie_max=25;
 	prefab_acteur[ACTEUR_SCIENTIFIQUE_FOU].coup_critique=20;
 	prefab_acteur[ACTEUR_SCIENTIFIQUE_FOU].hemorragie=false;
-	prefab_acteur[ACTEUR_SCIENTIFIQUE_FOU].hemorragie_tic=0;
+	prefab_acteur[ACTEUR_SCIENTIFIQUE_FOU].tic_hemorragie=0;
 	prefab_acteur[ACTEUR_SCIENTIFIQUE_FOU].comportement_type=CMPRTMNT_AGRESSIF_NO_LIMIT;
 	prefab_acteur[ACTEUR_SCIENTIFIQUE_FOU].fuite=false;
 	prefab_acteur[ACTEUR_SCIENTIFIQUE_FOU].point_action_restant=0;
 	for(int i=0;i<MAX_EQUIPMNT;i++)	
 	prefab_acteur[ACTEUR_SCIENTIFIQUE_FOU].equipement[i]=NULL;
+	prefab_acteur[ACTEUR_SCIENTIFIQUE_FOU].ajout_score=0;
 ///////////////////////////////////////////////////////////	
 
 /////////////////////////////////////////////////////////////
@@ -475,8 +553,10 @@ int creer_prefab_acteurs()
 	strcpy(description_acteur[ACTEUR_INFIRMIER],"Un infirmier a la carrure impressionnante.");
 	
 	prefab_acteur[ACTEUR_INFIRMIER].acteur_type=ACTEUR_INFIRMIER;
+	prefab_acteur[ACTEUR_INFIRMIER].acteur_nom=nom_acteur[ACTEUR_INFIRMIER];
+	prefab_acteur[ACTEUR_INFIRMIER].description=description_acteur[ACTEUR_INFIRMIER];
 	prefab_acteur[ACTEUR_INFIRMIER].bmp_index=BMP_INFIRMIER;
-	prefab_acteur[ACTEUR_INFIRMIER].bmp_index_detruit=0;
+	prefab_acteur[ACTEUR_INFIRMIER].bmp_index_detruit=BMP_H_CADAVRE;
 	prefab_acteur[ACTEUR_INFIRMIER].x=-1;
 	prefab_acteur[ACTEUR_INFIRMIER].y=-1;
 	prefab_acteur[ACTEUR_INFIRMIER].bloquant=true;
@@ -487,12 +567,13 @@ int creer_prefab_acteurs()
 	prefab_acteur[ACTEUR_INFIRMIER].vie_max=50;
 	prefab_acteur[ACTEUR_INFIRMIER].coup_critique=23;
 	prefab_acteur[ACTEUR_INFIRMIER].hemorragie=false;
-	prefab_acteur[ACTEUR_INFIRMIER].hemorragie_tic=0;
+	prefab_acteur[ACTEUR_INFIRMIER].tic_hemorragie=0;
 	prefab_acteur[ACTEUR_INFIRMIER].comportement_type=CMPRTMNT_AGRESSIF_LIMIT;
 	prefab_acteur[ACTEUR_INFIRMIER].fuite=false;
 	prefab_acteur[ACTEUR_INFIRMIER].point_action_restant=0;
 	for(int i=0;i<MAX_EQUIPMNT;i++)	
 	prefab_acteur[ACTEUR_INFIRMIER].equipement[i]=NULL;
+	prefab_acteur[ACTEUR_INFIRMIER].ajout_score=0;
 ///////////////////////////////////////////////////////////	
 
 //////////////////////////////////////////////////
@@ -503,8 +584,10 @@ int creer_prefab_acteurs()
 	strcpy(description_acteur[ACTEUR_INFIRMIER_FOU],"Un infirmier a la carrure impressionnante.");
 	
 	prefab_acteur[ACTEUR_INFIRMIER_FOU].acteur_type=ACTEUR_INFIRMIER_FOU;
+	prefab_acteur[ACTEUR_INFIRMIER_FOU].acteur_nom=nom_acteur[ACTEUR_INFIRMIER_FOU];
+	prefab_acteur[ACTEUR_INFIRMIER_FOU].description=description_acteur[ACTEUR_INFIRMIER_FOU];
 	prefab_acteur[ACTEUR_INFIRMIER_FOU].bmp_index=BMP_INFIRMIER;
-	prefab_acteur[ACTEUR_INFIRMIER_FOU].bmp_index_detruit=0;
+	prefab_acteur[ACTEUR_INFIRMIER_FOU].bmp_index_detruit=BMP_H_CADAVRE;
 	prefab_acteur[ACTEUR_INFIRMIER_FOU].x=-1;
 	prefab_acteur[ACTEUR_INFIRMIER_FOU].y=-1;
 	prefab_acteur[ACTEUR_INFIRMIER_FOU].bloquant=true;
@@ -515,24 +598,27 @@ int creer_prefab_acteurs()
 	prefab_acteur[ACTEUR_INFIRMIER_FOU].vie_max=65;
 	prefab_acteur[ACTEUR_INFIRMIER_FOU].coup_critique=13;
 	prefab_acteur[ACTEUR_INFIRMIER_FOU].hemorragie=false;
-	prefab_acteur[ACTEUR_INFIRMIER_FOU].hemorragie_tic=0;
+	prefab_acteur[ACTEUR_INFIRMIER_FOU].tic_hemorragie=0;
 	prefab_acteur[ACTEUR_INFIRMIER_FOU].comportement_type=CMPRTMNT_AGRESSIF_NO_LIMIT;
 	prefab_acteur[ACTEUR_INFIRMIER_FOU].fuite=false;
 	prefab_acteur[ACTEUR_INFIRMIER_FOU].point_action_restant=0;
 	for(int i=0;i<MAX_EQUIPMNT;i++)	
 	prefab_acteur[ACTEUR_INFIRMIER_FOU].equipement[i]=NULL;
+	prefab_acteur[ACTEUR_INFIRMIER_FOU].ajout_score=0;
 ///////////////////////////////////////////////////////////	
 
 //////////////////////////////////////////////////
-	nom_acteur[ACTEUR_CHIMPANZE]=new char[strlen("Singe")+1];
-	strcpy(nom_acteur[ACTEUR_CHIMPANZE],"Singe");
+	nom_acteur[ACTEUR_CHIMPANZE]=new char[strlen("singe")+1];
+	strcpy(nom_acteur[ACTEUR_CHIMPANZE],"singe");
 	
 	description_acteur[ACTEUR_CHIMPANZE]=new char[strlen("Une sorte de chimpanze sur-musculeux. Une chose est sure, on n'en trouve pas de telle sorte dans la nature!")+1];
 	strcpy(description_acteur[ACTEUR_CHIMPANZE],"Une sorte de chimpanze sur-musculeux. Une chose est sure, on n'en trouve pas de telle sorte dans la nature!");
 	
 	prefab_acteur[ACTEUR_CHIMPANZE].acteur_type=ACTEUR_CHIMPANZE;
+	prefab_acteur[ACTEUR_CHIMPANZE].acteur_nom=nom_acteur[ACTEUR_CHIMPANZE];
+	prefab_acteur[ACTEUR_CHIMPANZE].description=description_acteur[ACTEUR_CHIMPANZE];
 	prefab_acteur[ACTEUR_CHIMPANZE].bmp_index=BMP_CHIMPANZE;
-	prefab_acteur[ACTEUR_CHIMPANZE].bmp_index_detruit=0;
+	prefab_acteur[ACTEUR_CHIMPANZE].bmp_index_detruit=BMP_H_CADAVRE;
 	prefab_acteur[ACTEUR_CHIMPANZE].x=-1;
 	prefab_acteur[ACTEUR_CHIMPANZE].y=-1;
 	prefab_acteur[ACTEUR_CHIMPANZE].bloquant=true;
@@ -543,12 +629,13 @@ int creer_prefab_acteurs()
 	prefab_acteur[ACTEUR_CHIMPANZE].vie_max=45;
 	prefab_acteur[ACTEUR_CHIMPANZE].coup_critique=0;
 	prefab_acteur[ACTEUR_CHIMPANZE].hemorragie=false;
-	prefab_acteur[ACTEUR_CHIMPANZE].hemorragie_tic=0;
+	prefab_acteur[ACTEUR_CHIMPANZE].tic_hemorragie=0;
 	prefab_acteur[ACTEUR_CHIMPANZE].comportement_type=CMPRTMNT_AGRESSIF_FUYARD;
 	prefab_acteur[ACTEUR_CHIMPANZE].fuite=false;
 	prefab_acteur[ACTEUR_CHIMPANZE].point_action_restant=0;
 	for(int i=0;i<MAX_EQUIPMNT;i++)	
 	prefab_acteur[ACTEUR_CHIMPANZE].equipement[i]=NULL;
+	prefab_acteur[ACTEUR_CHIMPANZE].ajout_score=0;
 ///////////////////////////////////////////////////////////	
 
 
@@ -560,8 +647,10 @@ int creer_prefab_acteurs()
 	strcpy(description_acteur[ACTEUR_GORILLE],"Un gorille. Depuis qu'il est en liberte, il est tres enerve et desire faire payer son emprisonnement a tous le monde.");
 	
 	prefab_acteur[ACTEUR_GORILLE].acteur_type=ACTEUR_GORILLE;
+	prefab_acteur[ACTEUR_GORILLE].acteur_nom=nom_acteur[ACTEUR_GORILLE];
+	prefab_acteur[ACTEUR_GORILLE].description=description_acteur[ACTEUR_GORILLE];
 	prefab_acteur[ACTEUR_GORILLE].bmp_index=BMP_GORILLE;
-	prefab_acteur[ACTEUR_GORILLE].bmp_index_detruit=0;
+	prefab_acteur[ACTEUR_GORILLE].bmp_index_detruit=BMP_H_CADAVRE;
 	prefab_acteur[ACTEUR_GORILLE].x=-1;
 	prefab_acteur[ACTEUR_GORILLE].y=-1;
 	prefab_acteur[ACTEUR_GORILLE].bloquant=true;
@@ -572,12 +661,13 @@ int creer_prefab_acteurs()
 	prefab_acteur[ACTEUR_GORILLE].vie_max=90;
 	prefab_acteur[ACTEUR_GORILLE].coup_critique=25;
 	prefab_acteur[ACTEUR_GORILLE].hemorragie=false;
-	prefab_acteur[ACTEUR_GORILLE].hemorragie_tic=0;
+	prefab_acteur[ACTEUR_GORILLE].tic_hemorragie=0;
 	prefab_acteur[ACTEUR_GORILLE].comportement_type=CMPRTMNT_AGRESSIF_NO_LIMIT;
 	prefab_acteur[ACTEUR_GORILLE].fuite=false;
 	prefab_acteur[ACTEUR_GORILLE].point_action_restant=0;
 	for(int i=0;i<MAX_EQUIPMNT;i++)	
 	prefab_acteur[ACTEUR_GORILLE].equipement[i]=NULL;
+	prefab_acteur[ACTEUR_GORILLE].ajout_score=0;
 ///////////////////////////////////////////////////////////	
 
 //////////////////////////////////////////////////
@@ -588,8 +678,10 @@ int creer_prefab_acteurs()
 	strcpy(description_acteur[ACTEUR_SINGE_MUTANT],"Un animal etrange et difforme qui a du etre un singe autrefois.");
 	
 	prefab_acteur[ACTEUR_SINGE_MUTANT].acteur_type=ACTEUR_SINGE_MUTANT;
+	prefab_acteur[ACTEUR_SINGE_MUTANT].acteur_nom=nom_acteur[ACTEUR_SINGE_MUTANT];
+	prefab_acteur[ACTEUR_SINGE_MUTANT].description=description_acteur[ACTEUR_SINGE_MUTANT];
 	prefab_acteur[ACTEUR_SINGE_MUTANT].bmp_index=BMP_SINGE_MUTANT;
-	prefab_acteur[ACTEUR_SINGE_MUTANT].bmp_index_detruit=0;
+	prefab_acteur[ACTEUR_SINGE_MUTANT].bmp_index_detruit=BMP_H_CADAVRE;
 	prefab_acteur[ACTEUR_SINGE_MUTANT].x=-1;
 	prefab_acteur[ACTEUR_SINGE_MUTANT].y=-1;
 	prefab_acteur[ACTEUR_SINGE_MUTANT].bloquant=true;
@@ -600,12 +692,13 @@ int creer_prefab_acteurs()
 	prefab_acteur[ACTEUR_SINGE_MUTANT].vie_max=105;
 	prefab_acteur[ACTEUR_SINGE_MUTANT].coup_critique=20;
 	prefab_acteur[ACTEUR_SINGE_MUTANT].hemorragie=false;
-	prefab_acteur[ACTEUR_SINGE_MUTANT].hemorragie_tic=0;
+	prefab_acteur[ACTEUR_SINGE_MUTANT].tic_hemorragie=0;
 	prefab_acteur[ACTEUR_SINGE_MUTANT].comportement_type=CMPRTMNT_AGRESSIF_NO_LIMIT;
 	prefab_acteur[ACTEUR_SINGE_MUTANT].fuite=false;
 	prefab_acteur[ACTEUR_SINGE_MUTANT].point_action_restant=0;
 	for(int i=0;i<MAX_EQUIPMNT;i++)	
 	prefab_acteur[ACTEUR_SINGE_MUTANT].equipement[i]=NULL;
+	prefab_acteur[ACTEUR_SINGE_MUTANT].ajout_score=0;
 ///////////////////////////////////////////////////////////	
 
 //////////////////////////////////////////////////
@@ -616,8 +709,10 @@ int creer_prefab_acteurs()
 	strcpy(description_acteur[ACTEUR_CHIEN],"Un chien de laboratoire.");
 	
 	prefab_acteur[ACTEUR_CHIEN].acteur_type=ACTEUR_CHIEN;
+	prefab_acteur[ACTEUR_CHIEN].acteur_nom=nom_acteur[ACTEUR_CHIEN];
+	prefab_acteur[ACTEUR_CHIEN].description=description_acteur[ACTEUR_CHIEN];
 	prefab_acteur[ACTEUR_CHIEN].bmp_index=BMP_CHIEN;
-	prefab_acteur[ACTEUR_CHIEN].bmp_index_detruit=0;
+	prefab_acteur[ACTEUR_CHIEN].bmp_index_detruit=BMP_H_CADAVRE;
 	prefab_acteur[ACTEUR_CHIEN].x=-1;
 	prefab_acteur[ACTEUR_CHIEN].y=-1;
 	prefab_acteur[ACTEUR_CHIEN].bloquant=true;
@@ -628,12 +723,13 @@ int creer_prefab_acteurs()
 	prefab_acteur[ACTEUR_CHIEN].vie_max=20;
 	prefab_acteur[ACTEUR_CHIEN].coup_critique=3;
 	prefab_acteur[ACTEUR_CHIEN].hemorragie=false;
-	prefab_acteur[ACTEUR_CHIEN].hemorragie_tic=0;
+	prefab_acteur[ACTEUR_CHIEN].tic_hemorragie=0;
 	prefab_acteur[ACTEUR_CHIEN].comportement_type=CMPRTMNT_AGRESSIF_FUYARD;
 	prefab_acteur[ACTEUR_CHIEN].fuite=false;
 	prefab_acteur[ACTEUR_CHIEN].point_action_restant=0;
 	for(int i=0;i<MAX_EQUIPMNT;i++)	
 	prefab_acteur[ACTEUR_CHIEN].equipement[i]=NULL;
+	prefab_acteur[ACTEUR_CHIEN].ajout_score=0;
 ///////////////////////////////////////////////////////////	
 
 
@@ -645,8 +741,10 @@ int creer_prefab_acteurs()
 	strcpy(description_acteur[ACTEUR_CHIEN_MUTANT],"Un chien de laboratoire.");
 	
 	prefab_acteur[ACTEUR_CHIEN_MUTANT].acteur_type=ACTEUR_CHIEN_MUTANT;
+	prefab_acteur[ACTEUR_CHIEN_MUTANT].acteur_nom=nom_acteur[ACTEUR_CHIEN_MUTANT];
+	prefab_acteur[ACTEUR_CHIEN_MUTANT].description=description_acteur[ACTEUR_CHIEN_MUTANT];
 	prefab_acteur[ACTEUR_CHIEN_MUTANT].bmp_index=BMP_CHIEN_MUTANT;
-	prefab_acteur[ACTEUR_CHIEN_MUTANT].bmp_index_detruit=0;
+	prefab_acteur[ACTEUR_CHIEN_MUTANT].bmp_index_detruit=BMP_H_CADAVRE;
 	prefab_acteur[ACTEUR_CHIEN_MUTANT].x=-1;
 	prefab_acteur[ACTEUR_CHIEN_MUTANT].y=-1;
 	prefab_acteur[ACTEUR_CHIEN_MUTANT].bloquant=true;
@@ -657,12 +755,13 @@ int creer_prefab_acteurs()
 	prefab_acteur[ACTEUR_CHIEN_MUTANT].vie_max=40;
 	prefab_acteur[ACTEUR_CHIEN_MUTANT].coup_critique=10;
 	prefab_acteur[ACTEUR_CHIEN_MUTANT].hemorragie=false;
-	prefab_acteur[ACTEUR_CHIEN_MUTANT].hemorragie_tic=0;
+	prefab_acteur[ACTEUR_CHIEN_MUTANT].tic_hemorragie=0;
 	prefab_acteur[ACTEUR_CHIEN_MUTANT].comportement_type=CMPRTMNT_AGRESSIF_LIMIT;
 	prefab_acteur[ACTEUR_CHIEN_MUTANT].fuite=false;
 	prefab_acteur[ACTEUR_CHIEN_MUTANT].point_action_restant=0;
 	for(int i=0;i<MAX_EQUIPMNT;i++)	
 	prefab_acteur[ACTEUR_CHIEN_MUTANT].equipement[i]=NULL;
+	prefab_acteur[ACTEUR_CHIEN_MUTANT].ajout_score=0;
 ///////////////////////////////////////////////////////////	
 
 
@@ -674,8 +773,10 @@ int creer_prefab_acteurs()
 	strcpy(description_acteur[ACTEUR_AGENT_SECURITE],"Un agent de securite, assez lourdement protege.");
 	
 	prefab_acteur[ACTEUR_AGENT_SECURITE].acteur_type=ACTEUR_AGENT_SECURITE;
+	prefab_acteur[ACTEUR_AGENT_SECURITE].acteur_nom=nom_acteur[ACTEUR_AGENT_SECURITE];
+	prefab_acteur[ACTEUR_AGENT_SECURITE].description=description_acteur[ACTEUR_AGENT_SECURITE];
 	prefab_acteur[ACTEUR_AGENT_SECURITE].bmp_index=BMP_AGENT_SECU;
-	prefab_acteur[ACTEUR_AGENT_SECURITE].bmp_index_detruit=0;
+	prefab_acteur[ACTEUR_AGENT_SECURITE].bmp_index_detruit=BMP_H_CADAVRE;
 	prefab_acteur[ACTEUR_AGENT_SECURITE].x=-1;
 	prefab_acteur[ACTEUR_AGENT_SECURITE].y=-1;
 	prefab_acteur[ACTEUR_AGENT_SECURITE].bloquant=true;
@@ -686,12 +787,13 @@ int creer_prefab_acteurs()
 	prefab_acteur[ACTEUR_AGENT_SECURITE].vie_max=60;
 	prefab_acteur[ACTEUR_AGENT_SECURITE].coup_critique=12;
 	prefab_acteur[ACTEUR_AGENT_SECURITE].hemorragie=false;
-	prefab_acteur[ACTEUR_AGENT_SECURITE].hemorragie_tic=0;
+	prefab_acteur[ACTEUR_AGENT_SECURITE].tic_hemorragie=0;
 	prefab_acteur[ACTEUR_AGENT_SECURITE].comportement_type=CMPRTMNT_AGRESSIF_NO_LIMIT;
 	prefab_acteur[ACTEUR_AGENT_SECURITE].fuite=false;
 	prefab_acteur[ACTEUR_AGENT_SECURITE].point_action_restant=0;
 	for(int i=0;i<MAX_EQUIPMNT;i++)	
 	prefab_acteur[ACTEUR_AGENT_SECURITE].equipement[i]=NULL;
+	prefab_acteur[ACTEUR_AGENT_SECURITE].ajout_score=0;
 ///////////////////////////////////////////////////////////	
 
 
@@ -703,8 +805,10 @@ int creer_prefab_acteurs()
 	strcpy(description_acteur[ACTEUR_AGENT_SECURITE_ARME],"Un agent de securite equipe d'un pistolet.");
 	
 	prefab_acteur[ACTEUR_AGENT_SECURITE_ARME].acteur_type=ACTEUR_AGENT_SECURITE_ARME;
+	prefab_acteur[ACTEUR_AGENT_SECURITE_ARME].acteur_nom=nom_acteur[ACTEUR_AGENT_SECURITE_ARME];
+	prefab_acteur[ACTEUR_AGENT_SECURITE_ARME].description=description_acteur[ACTEUR_AGENT_SECURITE_ARME];
 	prefab_acteur[ACTEUR_AGENT_SECURITE_ARME].bmp_index=BMP_AGENT_SECU_ARME;
-	prefab_acteur[ACTEUR_AGENT_SECURITE_ARME].bmp_index_detruit=0;
+	prefab_acteur[ACTEUR_AGENT_SECURITE_ARME].bmp_index_detruit=BMP_H_CADAVRE;
 	prefab_acteur[ACTEUR_AGENT_SECURITE_ARME].x=-1;
 	prefab_acteur[ACTEUR_AGENT_SECURITE_ARME].y=-1;
 	prefab_acteur[ACTEUR_AGENT_SECURITE_ARME].bloquant=true;
@@ -715,12 +819,13 @@ int creer_prefab_acteurs()
 	prefab_acteur[ACTEUR_AGENT_SECURITE_ARME].vie_max=70;
 	prefab_acteur[ACTEUR_AGENT_SECURITE_ARME].coup_critique=10;
 	prefab_acteur[ACTEUR_AGENT_SECURITE_ARME].hemorragie=false;
-	prefab_acteur[ACTEUR_AGENT_SECURITE_ARME].hemorragie_tic=0;
+	prefab_acteur[ACTEUR_AGENT_SECURITE_ARME].tic_hemorragie=0;
 	prefab_acteur[ACTEUR_AGENT_SECURITE_ARME].comportement_type=CMPRTMNT_AGRESSIF_NO_LIMIT;
 	prefab_acteur[ACTEUR_AGENT_SECURITE_ARME].fuite=false;
 	prefab_acteur[ACTEUR_AGENT_SECURITE_ARME].point_action_restant=0;
 	for(int i=0;i<MAX_EQUIPMNT;i++)	
 	prefab_acteur[ACTEUR_AGENT_SECURITE_ARME].equipement[i]=NULL;
+	prefab_acteur[ACTEUR_AGENT_SECURITE_ARME].ajout_score=0;
 ///////////////////////////////////////////////////////////	
 
 
@@ -732,8 +837,10 @@ int creer_prefab_acteurs()
 	strcpy(description_acteur[ACTEUR_AGENT_SECURITE_ARME_L],"Un agent de securite lourdement arme.");
 	
 	prefab_acteur[ACTEUR_AGENT_SECURITE_ARME_L].acteur_type=ACTEUR_AGENT_SECURITE_ARME_L;
+	prefab_acteur[ACTEUR_AGENT_SECURITE_ARME_L].acteur_nom=nom_acteur[ACTEUR_AGENT_SECURITE_ARME_L];
+	prefab_acteur[ACTEUR_AGENT_SECURITE_ARME_L].description=description_acteur[ACTEUR_AGENT_SECURITE_ARME_L];
 	prefab_acteur[ACTEUR_AGENT_SECURITE_ARME_L].bmp_index=BMP_AGENT_SECU_ARME_L;
-	prefab_acteur[ACTEUR_AGENT_SECURITE_ARME_L].bmp_index_detruit=0;
+	prefab_acteur[ACTEUR_AGENT_SECURITE_ARME_L].bmp_index_detruit=BMP_H_CADAVRE;
 	prefab_acteur[ACTEUR_AGENT_SECURITE_ARME_L].x=-1;
 	prefab_acteur[ACTEUR_AGENT_SECURITE_ARME_L].y=-1;
 	prefab_acteur[ACTEUR_AGENT_SECURITE_ARME_L].bloquant=true;
@@ -744,12 +851,13 @@ int creer_prefab_acteurs()
 	prefab_acteur[ACTEUR_AGENT_SECURITE_ARME_L].vie_max=90;
 	prefab_acteur[ACTEUR_AGENT_SECURITE_ARME_L].coup_critique=20;
 	prefab_acteur[ACTEUR_AGENT_SECURITE_ARME_L].hemorragie=false;
-	prefab_acteur[ACTEUR_AGENT_SECURITE_ARME_L].hemorragie_tic=0;
+	prefab_acteur[ACTEUR_AGENT_SECURITE_ARME_L].tic_hemorragie=0;
 	prefab_acteur[ACTEUR_AGENT_SECURITE_ARME_L].comportement_type=CMPRTMNT_AGRESSIF_NO_LIMIT;
 	prefab_acteur[ACTEUR_AGENT_SECURITE_ARME_L].fuite=false;
 	prefab_acteur[ACTEUR_AGENT_SECURITE_ARME_L].point_action_restant=0;
 	for(int i=0;i<MAX_EQUIPMNT;i++)	
 	prefab_acteur[ACTEUR_AGENT_SECURITE_ARME_L].equipement[i]=NULL;
+	prefab_acteur[ACTEUR_AGENT_SECURITE_ARME_L].ajout_score=0;
 ///////////////////////////////////////////////////////////	
 
 //////////////////////////////////////////////////
@@ -760,8 +868,10 @@ int creer_prefab_acteurs()
 	strcpy(description_acteur[ACTEUR_SOLDAT],"Un soldat, surprotege et surarme.");
 	
 	prefab_acteur[ACTEUR_SOLDAT].acteur_type=ACTEUR_SOLDAT;
+	prefab_acteur[ACTEUR_SOLDAT].acteur_nom=nom_acteur[ACTEUR_SOLDAT];
+	prefab_acteur[ACTEUR_SOLDAT].description=description_acteur[ACTEUR_SOLDAT];
 	prefab_acteur[ACTEUR_SOLDAT].bmp_index=BMP_SOLDAT;
-	prefab_acteur[ACTEUR_SOLDAT].bmp_index_detruit=0;
+	prefab_acteur[ACTEUR_SOLDAT].bmp_index_detruit=BMP_H_CADAVRE;
 	prefab_acteur[ACTEUR_SOLDAT].x=-1,
 	prefab_acteur[ACTEUR_SOLDAT].y=-1;
 	prefab_acteur[ACTEUR_SOLDAT].bloquant=true;
@@ -772,12 +882,13 @@ int creer_prefab_acteurs()
 	prefab_acteur[ACTEUR_SOLDAT].vie_max=110;
 	prefab_acteur[ACTEUR_SOLDAT].coup_critique=15;
 	prefab_acteur[ACTEUR_SOLDAT].hemorragie=false;
-	prefab_acteur[ACTEUR_SOLDAT].hemorragie_tic=0;
+	prefab_acteur[ACTEUR_SOLDAT].tic_hemorragie=0;
 	prefab_acteur[ACTEUR_SOLDAT].comportement_type=CMPRTMNT_AGRESSIF_NO_LIMIT;
 	prefab_acteur[ACTEUR_SOLDAT].fuite=false;
 	prefab_acteur[ACTEUR_SOLDAT].point_action_restant=0;
 	for(int i=0;i<MAX_EQUIPMNT;i++)	
 	prefab_acteur[ACTEUR_SOLDAT].equipement[i]=NULL;
+	prefab_acteur[ACTEUR_SOLDAT].ajout_score=0;
 ///////////////////////////////////////////////////////////	
 
 //////////////////////////////////////////////////
@@ -788,8 +899,10 @@ int creer_prefab_acteurs()
 	strcpy(description_acteur[ACTEUR_H_COBAYE],"Un cobaye humain comme vous. Il est hagard et famelique.");
 	
 	prefab_acteur[ACTEUR_H_COBAYE].acteur_type=ACTEUR_H_COBAYE;
+	prefab_acteur[ACTEUR_H_COBAYE].acteur_nom=nom_acteur[ACTEUR_H_COBAYE];
+	prefab_acteur[ACTEUR_H_COBAYE].description=description_acteur[ACTEUR_H_COBAYE];
 	prefab_acteur[ACTEUR_H_COBAYE].bmp_index=BMP_H_COBAYE;
-	prefab_acteur[ACTEUR_H_COBAYE].bmp_index_detruit=0;
+	prefab_acteur[ACTEUR_H_COBAYE].bmp_index_detruit=BMP_H_CADAVRE;
 	prefab_acteur[ACTEUR_H_COBAYE].x=-1;
 	prefab_acteur[ACTEUR_H_COBAYE].y=-1;
 	prefab_acteur[ACTEUR_H_COBAYE].bloquant=true;
@@ -800,12 +913,13 @@ int creer_prefab_acteurs()
 	prefab_acteur[ACTEUR_H_COBAYE].vie_max=20;
 	prefab_acteur[ACTEUR_H_COBAYE].coup_critique=1;
 	prefab_acteur[ACTEUR_H_COBAYE].hemorragie=false;
-	prefab_acteur[ACTEUR_H_COBAYE].hemorragie_tic=0;
+	prefab_acteur[ACTEUR_H_COBAYE].tic_hemorragie=0;
 	prefab_acteur[ACTEUR_H_COBAYE].comportement_type=CMPRTMNT_AGRESSIF_FUYARD;
 	prefab_acteur[ACTEUR_H_COBAYE].fuite=false;
 	prefab_acteur[ACTEUR_H_COBAYE].point_action_restant=0;
 	for(int i=0;i<MAX_EQUIPMNT;i++)	
 	prefab_acteur[ACTEUR_H_COBAYE].equipement[i]=NULL;
+	prefab_acteur[ACTEUR_H_COBAYE].ajout_score=0;
 ///////////////////////////////////////////////////////////	
 
 //////////////////////////////////////////////////
@@ -816,8 +930,10 @@ int creer_prefab_acteurs()
 	strcpy(description_acteur[ACTEUR_H_COBAYE_FOU],"Un cobaye humain comme vous. Il est hagard et famelique.");
 	
 	prefab_acteur[ACTEUR_H_COBAYE_FOU].acteur_type=ACTEUR_H_COBAYE_FOU;
+	prefab_acteur[ACTEUR_H_COBAYE_FOU].acteur_nom=nom_acteur[ACTEUR_H_COBAYE_FOU];
+	prefab_acteur[ACTEUR_H_COBAYE_FOU].description=description_acteur[ACTEUR_H_COBAYE_FOU];
 	prefab_acteur[ACTEUR_H_COBAYE_FOU].bmp_index=BMP_H_COBAYE_FOU;
-	prefab_acteur[ACTEUR_H_COBAYE_FOU].bmp_index_detruit=0;
+	prefab_acteur[ACTEUR_H_COBAYE_FOU].bmp_index_detruit=BMP_H_CADAVRE;
 	prefab_acteur[ACTEUR_H_COBAYE_FOU].x=-1;
 	prefab_acteur[ACTEUR_H_COBAYE_FOU].y=-1;
 	prefab_acteur[ACTEUR_H_COBAYE_FOU].bloquant=true;
@@ -828,12 +944,13 @@ int creer_prefab_acteurs()
 	prefab_acteur[ACTEUR_H_COBAYE_FOU].vie_max=40;
 	prefab_acteur[ACTEUR_H_COBAYE_FOU].coup_critique=5;
 	prefab_acteur[ACTEUR_H_COBAYE_FOU].hemorragie=false;
-	prefab_acteur[ACTEUR_H_COBAYE_FOU].hemorragie_tic=0;
+	prefab_acteur[ACTEUR_H_COBAYE_FOU].tic_hemorragie=0;
 	prefab_acteur[ACTEUR_H_COBAYE_FOU].comportement_type=CMPRTMNT_AGRESSIF_NO_LIMIT;
 	prefab_acteur[ACTEUR_H_COBAYE_FOU].fuite=false;
 	prefab_acteur[ACTEUR_H_COBAYE_FOU].point_action_restant=0;
 	for(int i=0;i<MAX_EQUIPMNT;i++)	
 	prefab_acteur[ACTEUR_H_COBAYE_FOU].equipement[i]=NULL;
+	prefab_acteur[ACTEUR_H_COBAYE_FOU].ajout_score=0;
 ///////////////////////////////////////////////////////////	
 
 //////////////////////////////////////////////////
@@ -844,8 +961,10 @@ int creer_prefab_acteurs()
 	strcpy(description_acteur[ACTEUR_H_COBAYE_MUTANT],"Autrefois, cette chose etait un cobaye humain, comme vous. Maintenant, c'est un amas de muscle a l'air eteint.");
 	
 	prefab_acteur[ACTEUR_H_COBAYE_MUTANT].acteur_type=ACTEUR_H_COBAYE_MUTANT;
+	prefab_acteur[ACTEUR_H_COBAYE_MUTANT].acteur_nom=nom_acteur[ACTEUR_H_COBAYE_MUTANT];
+	prefab_acteur[ACTEUR_H_COBAYE_MUTANT].description=description_acteur[ACTEUR_H_COBAYE_MUTANT];
 	prefab_acteur[ACTEUR_H_COBAYE_MUTANT].bmp_index=BMP_H_COBAYE_MUTANT;
-	prefab_acteur[ACTEUR_H_COBAYE_MUTANT].bmp_index_detruit=0;
+	prefab_acteur[ACTEUR_H_COBAYE_MUTANT].bmp_index_detruit=BMP_H_CADAVRE;
 	prefab_acteur[ACTEUR_H_COBAYE_MUTANT].x=-1;
 	prefab_acteur[ACTEUR_H_COBAYE_MUTANT].y=-1;
 	prefab_acteur[ACTEUR_H_COBAYE_MUTANT].bloquant=true;
@@ -856,12 +975,13 @@ int creer_prefab_acteurs()
 	prefab_acteur[ACTEUR_H_COBAYE_MUTANT].vie_max=80;
 	prefab_acteur[ACTEUR_H_COBAYE_MUTANT].coup_critique=10;
 	prefab_acteur[ACTEUR_H_COBAYE_MUTANT].hemorragie=false;
-	prefab_acteur[ACTEUR_H_COBAYE_MUTANT].hemorragie_tic=0;
+	prefab_acteur[ACTEUR_H_COBAYE_MUTANT].tic_hemorragie=0;
 	prefab_acteur[ACTEUR_H_COBAYE_MUTANT].comportement_type=CMPRTMNT_AGRESSIF_NO_LIMIT;
 	prefab_acteur[ACTEUR_H_COBAYE_MUTANT].fuite=false;
 	prefab_acteur[ACTEUR_H_COBAYE_MUTANT].point_action_restant=0;
 	for(int i=0;i<MAX_EQUIPMNT;i++)	
 	prefab_acteur[ACTEUR_H_COBAYE_MUTANT].equipement[i]=NULL;
+	prefab_acteur[ACTEUR_H_COBAYE_MUTANT].ajout_score=0;
 ///////////////////////////////////////////////////////////	
 
 
@@ -874,8 +994,10 @@ int creer_prefab_acteurs()
 	strcpy(description_acteur[ACTEUR_H_COBAYE_TANK],"Un colosse d'au moins 2.5m. Ses yeux, enfonces dans sa tete sous proportionnee et osseuse, brillent de colere.");
 	
 	prefab_acteur[ACTEUR_H_COBAYE_TANK].acteur_type=ACTEUR_H_COBAYE_TANK;
+	prefab_acteur[ACTEUR_H_COBAYE_TANK].acteur_nom=nom_acteur[ACTEUR_H_COBAYE_TANK];
+	prefab_acteur[ACTEUR_H_COBAYE_TANK].description=description_acteur[ACTEUR_H_COBAYE_TANK];
 	prefab_acteur[ACTEUR_H_COBAYE_TANK].bmp_index=BMP_H_COBAYE_TANK;
-	prefab_acteur[ACTEUR_H_COBAYE_TANK].bmp_index_detruit=0;
+	prefab_acteur[ACTEUR_H_COBAYE_TANK].bmp_index_detruit=BMP_H_CADAVRE;
 	prefab_acteur[ACTEUR_H_COBAYE_TANK].x=-1;
 	prefab_acteur[ACTEUR_H_COBAYE_TANK].y=-1;
 	prefab_acteur[ACTEUR_H_COBAYE_TANK].bloquant=true;
@@ -886,12 +1008,13 @@ int creer_prefab_acteurs()
 	prefab_acteur[ACTEUR_H_COBAYE_TANK].vie_max=250;
 	prefab_acteur[ACTEUR_H_COBAYE_TANK].coup_critique=20;
 	prefab_acteur[ACTEUR_H_COBAYE_TANK].hemorragie=false;
-	prefab_acteur[ACTEUR_H_COBAYE_TANK].hemorragie_tic=0;
+	prefab_acteur[ACTEUR_H_COBAYE_TANK].tic_hemorragie=0;
 	prefab_acteur[ACTEUR_H_COBAYE_TANK].comportement_type=CMPRTMNT_AGRESSIF_NO_LIMIT;
 	prefab_acteur[ACTEUR_H_COBAYE_TANK].fuite=false;
 	prefab_acteur[ACTEUR_H_COBAYE_TANK].point_action_restant=0;
 	for(int i=0;i<MAX_EQUIPMNT;i++)	
 	prefab_acteur[ACTEUR_H_COBAYE_TANK].equipement[i]=NULL;
+	prefab_acteur[ACTEUR_H_COBAYE_TANK].ajout_score=0;
 ///////////////////////////////////////////////////////////	
 
 
@@ -903,8 +1026,10 @@ int creer_prefab_acteurs()
 	strcpy(description_acteur[ACTEUR_H_COBAYE_MUT_COUREUR],"Un cobaye sec et musculeux. Ses pieds et ses mains griffues lui permettent de se deplacer tres rapidement sur le sol comme sur les murs.");
 	
 	prefab_acteur[ACTEUR_H_COBAYE_MUT_COUREUR].acteur_type=ACTEUR_H_COBAYE_MUT_COUREUR;
+	prefab_acteur[ACTEUR_H_COBAYE_MUT_COUREUR].acteur_nom=nom_acteur[ACTEUR_H_COBAYE_MUT_COUREUR];
+	prefab_acteur[ACTEUR_H_COBAYE_MUT_COUREUR].description=description_acteur[ACTEUR_H_COBAYE_MUT_COUREUR];
 	prefab_acteur[ACTEUR_H_COBAYE_MUT_COUREUR].bmp_index=BMP_H_COBAYE_MUT_COUREUR;
-	prefab_acteur[ACTEUR_H_COBAYE_MUT_COUREUR].bmp_index_detruit=0;
+	prefab_acteur[ACTEUR_H_COBAYE_MUT_COUREUR].bmp_index_detruit=BMP_H_CADAVRE;
 	prefab_acteur[ACTEUR_H_COBAYE_MUT_COUREUR].x=-1;
 	prefab_acteur[ACTEUR_H_COBAYE_MUT_COUREUR].y=-1;
 	prefab_acteur[ACTEUR_H_COBAYE_MUT_COUREUR].bloquant=true;
@@ -915,12 +1040,13 @@ int creer_prefab_acteurs()
 	prefab_acteur[ACTEUR_H_COBAYE_MUT_COUREUR].vie_max=40;
 	prefab_acteur[ACTEUR_H_COBAYE_MUT_COUREUR].coup_critique=70;
 	prefab_acteur[ACTEUR_H_COBAYE_MUT_COUREUR].hemorragie=false;
-	prefab_acteur[ACTEUR_H_COBAYE_MUT_COUREUR].hemorragie_tic=0;
+	prefab_acteur[ACTEUR_H_COBAYE_MUT_COUREUR].tic_hemorragie=0;
 	prefab_acteur[ACTEUR_H_COBAYE_MUT_COUREUR].comportement_type=CMPRTMNT_AGRESSIF_NO_LIMIT;
 	prefab_acteur[ACTEUR_H_COBAYE_MUT_COUREUR].fuite=false;
 	prefab_acteur[ACTEUR_H_COBAYE_MUT_COUREUR].point_action_restant=0;
 	for(int i=0;i<MAX_EQUIPMNT;i++)	
 	prefab_acteur[ACTEUR_H_COBAYE_MUT_COUREUR].equipement[i]=NULL;
+	prefab_acteur[ACTEUR_H_COBAYE_MUT_COUREUR].ajout_score=0;
 ///////////////////////////////////////////////////////////	
 
 	return 0;
@@ -997,24 +1123,59 @@ int degradation_equip_protec(acteur *act)
 		nb_equip++;
 	}
 	
-	//choix aleatoire de l objet.
-	nb_equip=genrand_int32()%nb_equip;
-	
-	//degradation de l objet
-	act->equipement[nb_equip]->etat_obj--;
-	
-	//suppression de l'objet si celui-ci est casse
-	if(act->equipement[nb_equip]->etat_obj<=0)
-	{
-		delete act->equipement[nb_equip];
-		act->equipement[nb_equip]=NULL;
-		return 1;
+		if(nb_equip!=0)
+		{
 		
-	}
+		//choix aleatoire de l objet.
+		nb_equip=genrand_int32()%nb_equip;
+		
+		//degradation de l objet
+		act->equipement[nb_equip]->etat_obj--;
 	
+		//suppression de l'objet si celui-ci est casse
+		if(act->equipement[nb_equip]->etat_obj<=0)
+		{
+			delete act->equipement[nb_equip];
+			act->equipement[nb_equip]=NULL;
+			return 1;
+			
+		}
+	}
 	return 0;
 	
 }
+
+
+// Fonction qui calcule la dégradation de l arme equipee
+//
+// Si le joueur frappe avec son arme ou l'utilise, 
+// on enleve 1 a l etat général de cette derniere.
+int degradation_equip_arme(acteur *act)
+{
+	
+	if(act->equipement[EQUIPMNT_MAIN_D]!=NULL)
+	{
+		
+		 if(objet_est_arme(act->equipement[EQUIPMNT_MAIN_D]))
+		 {
+		 	//degradation de l'objet
+		 	act->equipement[EQUIPMNT_MAIN_D]->etat_obj--;
+		 	
+		 }
+		
+		//suppression de l'objet si celui-ci est casse
+		if(act->equipement[EQUIPMNT_MAIN_D]->etat_obj<=0)
+		{
+			delete act->equipement[EQUIPMNT_MAIN_D];
+			act->equipement[EQUIPMNT_MAIN_D]=NULL;
+			return 1;
+			
+		}
+
+	}
+	return 0;
+}
+
 
 
 //int calcul_bonus_vit_deplacement(joeur *jr);
@@ -1035,7 +1196,71 @@ int calcul_bonus_equip_vitdeplace(acteur *act)
 	
 }
 
+/***********************************************************************
+********************FONCTIONS DE GESTION DES DIFFERENTES JAUGES *******/
 
+//int faire_saigner(acteur *act);
+//
+// Fonction pour initier une hémorragie chez l'acteur.
+// met le booleen hemorragie sur vraie et retourne 1 
+// (10% de chance).
+// Sinon retourne 0
+int transformer_en_cadavre(acteur *act)
+{
+	
+	act->bmp_index=act->bmp_index_detruit;
+	
+	return 0;
+}
+
+
+//Fonction a appeler en cas de dégat.
+// 
+// tirage pour savoir si le joueur est en état d'hémorragie.
+//Si c'est le cas -> met hemorragie a vrai et retourne 1
+// sinon, retourne 0;
+int faire_saigner(acteur *act)
+{
+	
+	if(genrand_int32()%101<20)
+	{
+		act->hemorragie=true;
+		return 1;
+	}
+	
+	return 0;
+}
+
+
+//int maj_hemorragie
+//fonction de mise a jour de l etat de sante du joueur 
+// en relation ac l hemorragie
+// retourne 0 si la sante atteint 0 
+// retourne 1 si il y a hemoragie
+// retourne 2 si il n y a pas hemoragie
+int maj_hemorragie(acteur  *act)
+{
+	if(act->hemorragie==false)return 2;
+	
+	act->tic_hemorragie++;
+	
+	if(act->tic_hemorragie>=duree[DUREE_PERTE_SANG])
+	{
+		act->tic_hemorragie=0;
+		act->vie--;
+		
+		if(act->vie<=0)
+		{
+		transformer_en_cadavre(act);
+		return 0;
+		}
+		
+	}
+	return 1;
+}
+
+/**********************************************************
+***********************************************************/
 
 // Fonction pour savoir si un sotckage est
 // libre chez les perso non joueur et 'lindice de celui
@@ -1119,6 +1344,8 @@ acteur * placer_mobilier(int x, int  y,int acteur_type)
 	
 	// RECOPIE DE L ACTEUR
 	act->acteur_type=prefab_acteur[acteur_type].acteur_type;
+	act->acteur_nom=prefab_acteur[acteur_type].acteur_nom;
+	act->description=prefab_acteur[acteur_type].description;
 	act->bmp_index=prefab_acteur[acteur_type].bmp_index;
 	act->bmp_index_detruit=prefab_acteur[acteur_type].bmp_index_detruit;
 	act->x=x;
@@ -1131,7 +1358,7 @@ acteur * placer_mobilier(int x, int  y,int acteur_type)
 	act->vie_max=prefab_acteur[acteur_type].vie_max;
 	act->coup_critique=prefab_acteur[acteur_type].coup_critique;
 	act->hemorragie=prefab_acteur[acteur_type].hemorragie;
-	act->hemorragie_tic=prefab_acteur[acteur_type].hemorragie_tic;
+	act->tic_hemorragie=prefab_acteur[acteur_type].tic_hemorragie;
 	act->comportement_type=prefab_acteur[acteur_type].comportement_type;
 	act->fuite=prefab_acteur[acteur_type].fuite;
 	act->point_action_restant=prefab_acteur[acteur_type].point_action_restant;
@@ -1267,6 +1494,8 @@ acteur * placer_personnage(int x,int y,int acteur_type)
 	
 	// RECOPIE DE L ACTEUR
 	act->acteur_type=prefab_acteur[acteur_type].acteur_type;
+	act->acteur_nom=prefab_acteur[acteur_type].acteur_nom;
+	act->description=prefab_acteur[acteur_type].description;
 	act->bmp_index=prefab_acteur[acteur_type].bmp_index;
 	act->bmp_index_detruit=prefab_acteur[acteur_type].bmp_index_detruit;
 	act->x=x;
@@ -1279,7 +1508,7 @@ acteur * placer_personnage(int x,int y,int acteur_type)
 	act->vie_max=prefab_acteur[acteur_type].vie_max;
 	act->coup_critique=prefab_acteur[acteur_type].coup_critique;
 	act->hemorragie=prefab_acteur[acteur_type].hemorragie;
-	act->hemorragie_tic=prefab_acteur[acteur_type].hemorragie_tic;
+	act->tic_hemorragie=prefab_acteur[acteur_type].tic_hemorragie;
 	act->comportement_type=prefab_acteur[acteur_type].comportement_type;
 	act->fuite=prefab_acteur[acteur_type].fuite;
 	act->point_action_restant=prefab_acteur[acteur_type].point_action_restant;

@@ -30,9 +30,9 @@ int main()
 	ALLEGRO_DISPLAY *display;
 	ALLEGRO_EVENT_QUEUE *queue;//file d'attente des evenement alleg
 	ALLEGRO_EVENT event;
-int seed=time(NULL);
-printf("%d",seed);
-init_genrand(seed);	
+//int seed=time(NULL);
+//printf("%d",seed);
+//init_genrand(seed);	
 //INITIALISATION DE LA LIBRAIRIE ALLEGRO***********************	
    if (!al_init()) {
       printf("erreur initialisation ALLEGRO");
@@ -96,25 +96,30 @@ moteur_jeu::init_alleg_objects(display);
 
 //moteur_jeu::monde[0]=cree_carte_test();
 
-moteur_jeu::monde[0]=creer_carte(0,10,65);
+moteur_jeu::monde[0]=creer_carte(0,14,68);
 
    //demarrage du timer
 
-	moteur_jeu::ply1.vie=100;
-	moteur_jeu::ply1.vitesse=100;
+	//moteur_jeu::ply1.vie=100;
+	//moteur_jeu::ply1.vitesse=100;
+	creer_jean_dupont(&moteur_jeu::ply1);
 //	moteur_jeu::placer_joueur(30,30);
-moteur_jeu::ply1.x=29;
-moteur_jeu::ply1.y=30;
+moteur_jeu::ply1.x=37;
+moteur_jeu::ply1.y=11;
 	moteur_jeu::centrer_camera_joueur();
 	moteur_jeu::calcul_champ_vision();
 	moteur_jeu::suppr_artefact_vision();
 	
 	int x,y;
 	bool t;
+	strcpy(moteur_jeu::ply1.nom,"gregoire");
 	moteur_jeu::ply1.equipement[EQUIPMNT_CHAUSSURE]=creer_objet(-1, -1, OBJ_CHAUSSURE);
 		moteur_jeu::ply1.equipement[EQUIPMNT_PANTALON]=creer_objet(-1, -1, OBJ_PANTALON);	
 		moteur_jeu::ply1.equipement[EQUIPMNT_MAIN_D]=creer_objet(-1, -1, OBJ_MITRAILLETTE);	
 	moteur_jeu::ply1.equipement[EQUIPMNT_MAIN_G]=creer_objet(-1, -1, OBJ_PANTALON);	
+	
+	moteur_jeu::ply1.hemorragie=true;
+	
 	
 	moteur_jeu::ply1.sac=true;
 	moteur_jeu::ply1.sac_contenu[1]=creer_objet(-1, -1, OBJ_MUNITION_PISTO);
@@ -123,11 +128,37 @@ moteur_jeu::ply1.y=30;
 	moteur_jeu::ply1.sac_contenu[3]=creer_objet(-1, -1, OBJ_MEDIPACK);
 	moteur_jeu::ply1.sac_contenu[4]=creer_objet(-1, -1, OBJ_PANTALON);
 	
+	for(int i=0;i<NB_MAX_ACTEUR;i++)
+	{
+		if(moteur_jeu::monde[0]->acteur_tab[i]==NULL)
+		{
+			moteur_jeu::monde[0]->acteur_tab[i]=placer_personnage(27,27,ACTEUR_CHIEN);
+			break;
+		}
+	}
+	for(int i=0;i<NB_MAX_ACTEUR;i++)
+	{
+		if(moteur_jeu::monde[0]->acteur_tab[i]==NULL)
+		{
+			moteur_jeu::monde[0]->acteur_tab[i]=placer_mobilier(23,29,ACTEUR_CONTENEUR_ACIDE);
+			break;
+		}
+	}
+	for(int i=0;i<NB_MAX_ACTEUR;i++)
+	{
+		if(moteur_jeu::monde[0]->acteur_tab[i]==NULL)
+		{
+			moteur_jeu::monde[0]->acteur_tab[i]=placer_mobilier(25,27,ACTEUR_BOUTEILLE_GAZ);
+			break;
+		}
+	}
 //	moteur_jeu::gestion_ramassage(queue);
 //	moteur_jeu::choix_cible(moteur_jeu::queue,&x,&y,&t); //OK
  //   moteur_jeu::gestion_inventaire(moteur_jeu::queue); // OK
  //carte *tt=creer_carte(0,8,50);
  //system("pause");
+    
+    placer_tile(&moteur_jeu::monde[0]->donnee_carte[25][25],TILE_VITRE); 
     
     gestionnaire_message::ajout_message("Voila un premier message pour verifier si la console fonctionne correctement. On fait une ligne assez longue de maniere a voir si les differents messages sont coupe convenablements",al_map_rgb(255,0,0));
 
@@ -141,8 +172,19 @@ gestionnaire_message::ajout_message("BlBlaBla!!!!",al_map_rgb(255,255,255));
 message *m=gestionnaire_message::recup_dernier_message();
 
 printf(m->mess);
+	  printf("test mobilier autour  %d\n", pas_de_mobilier_autour(moteur_jeu::monde[0], 39,11));
+
+for(int i=0;i<NB_MAX_ACTEUR;i++)
+{
+	if(moteur_jeu::monde[0]->acteur_tab[i]!=NULL)
+	printf("x %d,y %d\n",moteur_jeu::monde[0]->acteur_tab[i]->x,moteur_jeu::monde[0]->acteur_tab[i]->y );
+	
+	
+}
 //system("pause");
-	moteur_jeu::monde[0]->objet_tab[0]=creer_objet(28, 30, OBJ_IMPLANT_FORCE);
+	moteur_jeu::monde[0]->objet_tab[0]=creer_objet(37, 11, OBJ_IMPLANT_FORCE);
+	moteur_jeu::monde[0]->objet_tab[1]=creer_objet(37, 11, OBJ_CLE);
+
 	moteur_jeu::jeu();
 //	moteur_jeu::gestion_action_joueur(queue);
 	

@@ -21,8 +21,9 @@
 
 
 #include "objet.h"
-#include "joueur.h"
 #include "acteur.h"
+#include "joueur.h"
+
 
 #include "action.h"
 
@@ -32,6 +33,7 @@ joueur::joueur()
 {
 	
 	nom[0]='\0';
+	score=0;
 	bmp_index=1;
 	
 	x=-1;
@@ -180,6 +182,38 @@ int degradation_equip_protec(joueur *jr)
 }
 
 
+
+// Fonction qui calcule la dégradation de l arme equipee
+//
+// Si le joueur frappe avec son arme ou l'utilise, 
+// on enleve 1 a l etat général de cette derniere.
+int degradation_equip_arme(joueur *jr)
+{
+	
+	if(jr->equipement[EQUIPMNT_MAIN_D]!=NULL)
+	{
+		
+		 if(objet_est_arme(jr->equipement[EQUIPMNT_MAIN_D]))
+		 {
+		 	//degradation de l'objet
+		 	jr->equipement[EQUIPMNT_MAIN_D]->etat_obj--;
+		 	
+		 }
+		
+		//suppression de l'objet si celui-ci est casse
+		if(jr->equipement[EQUIPMNT_MAIN_D]->etat_obj<=0)
+		{
+			delete jr->equipement[EQUIPMNT_MAIN_D];
+			jr->equipement[EQUIPMNT_MAIN_D]=NULL;
+			return 1;
+			
+		}
+
+	}
+	return 0;
+}
+
+
 int calcul_bonus_equip_vitdeplace(joueur *jr)
 {
 	int vit=0;
@@ -265,6 +299,8 @@ int maj_hemorragie(joueur *jr)
 
 
 
+
+
 int ajout_adrenaline(joueur *jr,int prise_degat,int don_degat,bool mort_ennemi)
 {
 	
@@ -277,6 +313,25 @@ int ajout_adrenaline(joueur *jr,int prise_degat,int don_degat,bool mort_ennemi)
 	
 	if(jr->adrenaline>jr->adrenaline_max)
 	jr->adrenaline=jr->adrenaline_max;
+	
+	return 0;
+}
+
+
+
+//Fonction a appeler en cas de dégat.
+// 
+// tirage pour savoir si le joueur est en état d'hémorragie.
+//Si c'est le cas -> met hemorragie a vrai et retourne 1
+// sinon, retourne 0;
+int faire_saigner(joueur *jr)
+{
+	
+	if(genrand_int32()%101<8)
+	{
+		jr->hemorragie=true;
+		return 1;
+	}
 	
 	return 0;
 }
@@ -768,3 +823,49 @@ int recharger_arme(joueur *jr,int emplacement,bool sac)
 }
 
 
+/******************************************************************
+***************FONCTION DE GESTION DU SCORE **********************/
+
+int ajout_score_deplacement(joueur *jr)
+{
+	jr->score+=1;
+	return 0;
+}
+
+int ajout_score_changement_niveau(joueur *jr,int niveau)
+{
+	jr->score+=50*niveau;
+	return 0;
+}
+
+int ajout_score_mort_monstre(joueur *jr,acteur *act)
+{
+	
+	jr->score+=act->ajout_score;
+	return 0;
+}
+
+
+
+
+
+/*****************************************************************
+*****************DEBUGGAGE DU JEU********************************/
+
+int creer_jean_dupont(joueur *jr)
+{
+	jr->vitesse=100;
+	jr->vie_max=100;
+	jr->vie=100;
+	
+	jr->adrenaline_max=100;
+	jr->adrenaline=100;
+	
+	jr->coup_critique=10;
+	jr->hemorragie=false;
+	
+	jr->force=12;
+	jr->dexterite=12;
+
+return 0;	
+}
